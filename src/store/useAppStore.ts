@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { dishes as initialDishes } from '../data/dishes'
 import { defaultEventPlan, defaultSettings } from '../data/defaultSettings'
 import { computeIngredientsCostTotal } from '../lib/calculations'
+import type { CustomIngredientDef, CustomIngredients } from '../lib/ingredients'
 import type {
   AppSettings,
   Category,
@@ -36,6 +37,13 @@ interface AppState {
    * و روی همه‌ی غذاهایی که از این ماده استفاده می‌کنند اثر می‌گذارد، چون قیمت مؤثر از این لاگ
    * محاسبه می‌شود نه از یک کپی محلی روی هر غذا. */
   setIngredientPrice: (name: string, unitPrice: number) => void
+  /** مواد اولیه‌ی «دستی»‌ای که کاربر از صفحه‌ی «مواد اولیه» تعریف کرده و هنوز ممکن است در هیچ
+   * غذایی استفاده نشده باشند — تا بشود بعداً از منوی «افزودن ماده اولیه» در فرم ویرایش غذا
+   * انتخابشان کرد. نگاه کنید به src/lib/ingredients.ts::buildIngredientRows. */
+  customIngredients: CustomIngredients
+  /** تعریف یک ماده اولیه‌ی کاملاً جدید (نامی که قبلاً در هیچ غذا یا فهرست دستی‌ای نبوده). قیمت
+   * اولیه (اگر داده شود) بلافاصله به‌عنوان اولین رکورد ingredientPriceLog همان نام ثبت می‌شود. */
+  addCustomIngredient: (name: string, def: CustomIngredientDef, initialPrice: number | null) => void
 
   setPlanField: <K extends keyof EventPlan>(key: K, value: EventPlan[K]) => void
   setCategoryBudgetShare: (category: Category, value: number) => void
@@ -98,6 +106,11 @@ const USER_EDITABLE_DISH_FIELDS = [
   'proteinSourceVerified',
   'defaultCookingMethod',
   'defaultCookingMethodVerified',
+  // فهرست مواد اولیه‌ی یک غذا (نه قیمتشان — آن از ingredientPriceLog سراسری می‌آید) از فرم ویرایش
+  // غذا قابل افزودن/حذف است (نگاه کنید به DishFormModal) — پس مثل بقیه‌ی ویرایش‌های کاربر باید
+  // با هر انتشار جدید دیتابیس غذا حفظ شود.
+  'ingredients',
+  'ingredientsCostTotal',
 ] as const
 
 function reconcileDishes(persisted: Dish[] | undefined): Dish[] {
@@ -174,6 +187,7 @@ export const useAppStore = create<AppState>()(
       plan: defaultEventPlan,
       settings: defaultSettings,
       ingredientPriceLog: {},
+      customIngredients: {},
 
       setIngredientPrice: (name, unitPrice) =>
         set((state) => ({
@@ -182,6 +196,11 @@ export const useAppStore = create<AppState>()(
             [name]: [{ price: unitPrice, changedAt: new Date().toISOString() }, ...(state.ingredientPriceLog[name] ?? [])],
           },
         })),
+
+      addCustomIngredient: (name, def, initialPrice) => {
+        set((state) => ({ customIngredients: { ...state.customIngredients, [name]: def } }))
+        if (initialPrice != null && initialPrice > 0) get().setIngredientPrice(name, initialPrice)
+      },
 
       setPlanField: (key, value) =>
         set((state) => ({ plan: { ...state.plan, [key]: value } })),
@@ -398,6 +417,7 @@ export const useAppStore = create<AppState>()(
           // ذخیره‌شده در localStorage و دیتای کاملاً جدید و کاربرساخته است، هیچ‌وقت با کاتالوگ
           // تازه‌ی dishes.json تداخل ندارد — پس برخلاف dishes، نیازی به reconcile ندارد.
           ingredientPriceLog: p.ingredientPriceLog ?? {},
+          customIngredients: p.customIngredients ?? {},
         }
       },
     },

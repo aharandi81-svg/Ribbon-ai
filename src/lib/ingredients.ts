@@ -54,10 +54,19 @@ export interface IngredientRow {
   lastChangedAt: string | null
 }
 
-/** فهرست یکتا و تجمیع‌شده‌ی همه‌ی مواد اولیه‌ی استفاده‌شده در کل دیتابیس غذا — مبنای صفحه‌ی
- * «مواد اولیه». هر ماده فقط یک‌بار ظاهر می‌شود، با تعداد غذاهایی که از آن استفاده می‌کنند. */
-export function buildIngredientRows(dishes: Dish[], log: IngredientPriceLog): IngredientRow[] {
-  const byName = new Map<string, { unit: string; baselineUnitPrice: number | null; dishIds: Set<string> }>()
+/** تعریف یک ماده اولیه‌ی «دستی» که کاربر از صفحه‌ی «مواد اولیه» اضافه کرده — قبل از استفاده در
+ * هیچ غذایی هم در فهرست ظاهر می‌شود (dishCount صفر) تا بشود بعداً در فرم ویرایش غذا انتخابش کرد. */
+export interface CustomIngredientDef {
+  unit: string
+  group: string
+}
+export type CustomIngredients = Record<string, CustomIngredientDef>
+
+/** فهرست یکتا و تجمیع‌شده‌ی همه‌ی مواد اولیه‌ی استفاده‌شده در کل دیتابیس غذا به‌علاوه‌ی مواد اولیه‌ی
+ * دستی‌ای که هنوز در هیچ غذایی استفاده نشده‌اند — مبنای صفحه‌ی «مواد اولیه» و منوی «افزودن ماده
+ * اولیه» در فرم ویرایش غذا. هر ماده فقط یک‌بار ظاهر می‌شود، با تعداد غذاهایی که از آن استفاده می‌کنند. */
+export function buildIngredientRows(dishes: Dish[], log: IngredientPriceLog, customIngredients: CustomIngredients = {}): IngredientRow[] {
+  const byName = new Map<string, { unit: string; baselineUnitPrice: number | null; dishIds: Set<string>; group?: string }>()
   for (const dish of dishes) {
     if (!dish.ingredients) continue
     for (const ing of dish.ingredients) {
@@ -71,11 +80,17 @@ export function buildIngredientRows(dishes: Dish[], log: IngredientPriceLog): In
     }
   }
 
+  for (const [name, def] of Object.entries(customIngredients)) {
+    const existing = byName.get(name)
+    if (existing) existing.group = def.group
+    else byName.set(name, { unit: def.unit, baselineUnitPrice: null, dishIds: new Set(), group: def.group })
+  }
+
   const rows: IngredientRow[] = []
   for (const [name, info] of byName) {
     rows.push({
       name,
-      group: ingredientGroupOf(name),
+      group: info.group ?? ingredientGroupOf(name),
       unit: info.unit,
       unitPrice: currentIngredientPrice(name, info.baselineUnitPrice, log),
       dishCount: info.dishIds.size,

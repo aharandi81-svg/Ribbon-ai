@@ -1,18 +1,26 @@
 import { Fragment, useMemo, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
-import { Card, FormattedNumberInput, Modal } from '../components/ui'
+import { Button, Card, Field, FormattedNumberInput, Modal, Select } from '../components/ui'
 import { buildIngredientRows, type IngredientRow } from '../lib/ingredients'
-import { INGREDIENT_GROUP_ORDER } from '../data/ingredientGroups'
+import { INGREDIENT_GROUP_ORDER, FALLBACK_INGREDIENT_GROUP } from '../data/ingredientGroups'
 import { formatRial, formatJalaliDateTime } from '../lib/format'
 
 export function IngredientsPage() {
   const dishes = useAppStore((s) => s.dishes)
   const ingredientPriceLog = useAppStore((s) => s.ingredientPriceLog)
   const setIngredientPrice = useAppStore((s) => s.setIngredientPrice)
+  const customIngredients = useAppStore((s) => s.customIngredients)
+  const addCustomIngredient = useAppStore((s) => s.addCustomIngredient)
   const [search, setSearch] = useState('')
   const [historyFor, setHistoryFor] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newUnit, setNewUnit] = useState('گرم')
+  const [newGroup, setNewGroup] = useState<string>(FALLBACK_INGREDIENT_GROUP)
+  const [newPrice, setNewPrice] = useState(0)
+  const [addError, setAddError] = useState<string | null>(null)
 
-  const rows = useMemo(() => buildIngredientRows(dishes, ingredientPriceLog), [dishes, ingredientPriceLog])
+  const rows = useMemo(() => buildIngredientRows(dishes, ingredientPriceLog, customIngredients), [dishes, ingredientPriceLog, customIngredients])
 
   const filtered = useMemo(() => {
     const q = search.trim()
@@ -38,6 +46,29 @@ export function IngredientsPage() {
 
   const historyEntries = historyFor ? (ingredientPriceLog[historyFor] ?? []) : []
 
+  const resetAddForm = () => {
+    setNewName('')
+    setNewUnit('گرم')
+    setNewGroup(FALLBACK_INGREDIENT_GROUP)
+    setNewPrice(0)
+    setAddError(null)
+  }
+
+  const handleAddIngredient = () => {
+    const name = newName.trim()
+    if (!name) {
+      setAddError('نام ماده اولیه اجباری است.')
+      return
+    }
+    if (rows.some((r) => r.name === name)) {
+      setAddError('این ماده اولیه از قبل در فهرست وجود دارد.')
+      return
+    }
+    addCustomIngredient(name, { unit: newUnit.trim() || 'عدد', group: newGroup }, newPrice > 0 ? newPrice : null)
+    setShowAddModal(false)
+    resetAddForm()
+  }
+
   return (
     <Card title={`مواد اولیه (${rows.length} قلم)`}>
       <div className="mb-4 flex flex-wrap items-end gap-3">
@@ -51,7 +82,69 @@ export function IngredientsPage() {
         <span className="text-sm text-slate-500 dark:text-slate-400">
           قیمت هر ماده اولیه بلافاصله پس از ویرایش روی همه‌ی غذاهایی که از آن استفاده می‌کنند اعمال می‌شود.
         </span>
+        <div className="flex-1" />
+        <Button variant="primary" onClick={() => setShowAddModal(true)}>
+          + افزودن ماده اولیه جدید
+        </Button>
       </div>
+
+      {showAddModal && (
+        <Modal
+          title="افزودن ماده اولیه جدید"
+          onClose={() => {
+            setShowAddModal(false)
+            resetAddForm()
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <Field label="نام ماده اولیه">
+              <input
+                type="text"
+                autoFocus
+                value={newName}
+                onChange={(e) => {
+                  setNewName(e.target.value)
+                  setAddError(null)
+                }}
+                placeholder="مثلاً پودر کاری"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              />
+              {addError && <span className="text-xs text-red-600 dark:text-red-400">{addError}</span>}
+            </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="واحد اندازه‌گیری">
+                <input
+                  type="text"
+                  value={newUnit}
+                  onChange={(e) => setNewUnit(e.target.value)}
+                  placeholder="گرم / سی‌سی / عدد"
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </Field>
+              <Field label="دسته‌بندی">
+                <Select value={newGroup} onChange={setNewGroup} options={INGREDIENT_GROUP_ORDER} />
+              </Field>
+            </div>
+            <Field label="قیمت واحد اولیه (ریال)" hint="اختیاری — بعداً هم از همین صفحه قابل ثبت است.">
+              <FormattedNumberInput value={newPrice} onChange={setNewPrice} />
+            </Field>
+            <div className="flex justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddModal(false)
+                  resetAddForm()
+                }}
+              >
+                انصراف
+              </Button>
+              <Button variant="primary" onClick={handleAddIngredient}>
+                افزودن
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {historyFor && (
         <Modal title={`تاریخچه قیمت — ${historyFor}`} onClose={() => setHistoryFor(null)}>

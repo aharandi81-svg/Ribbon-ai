@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 import { Button, Checkbox, Field, FormattedNumberInput, Modal, NumberInput, Select } from './ui'
-import { effectiveIngredients, effectiveIngredientsCostTotal } from '../lib/ingredients'
+import { buildIngredientRows, effectiveIngredients, effectiveIngredientsCostTotal } from '../lib/ingredients'
+import { computeIngredientsCostTotal } from '../lib/calculations'
+import { INGREDIENT_GROUP_ORDER } from '../data/ingredientGroups'
 import { formatRial } from '../lib/format'
 import {
   CATEGORIES,
@@ -66,11 +68,15 @@ export function DishFormModal({
 }) {
   const addDish = useAppStore((s) => s.addDish)
   const updateDish = useAppStore((s) => s.updateDish)
+  const dishes = useAppStore((s) => s.dishes)
   const ingredientPriceLog = useAppStore((s) => s.ingredientPriceLog)
   const setIngredientPrice = useAppStore((s) => s.setIngredientPrice)
+  const customIngredients = useAppStore((s) => s.customIngredients)
   const [form, setForm] = useState<NewDishInput>(() => (dish ? formFromDish(dish) : makeInitialForm(initialCategory)))
   const [costText, setCostText] = useState(dish?.costPerServing ?? 0)
   const [submitted, setSubmitted] = useState(false)
+  const [pickedIngredientName, setPickedIngredientName] = useState('')
+  const [newIngredientQuantity, setNewIngredientQuantity] = useState(100)
 
   const patch = (p: Partial<NewDishInput>) => setForm((f) => ({ ...f, ...p }))
 
@@ -94,6 +100,41 @@ export function DishFormModal({
 
   const applyIngredientsCostAsPrice = () => {
     if (ingredientsCostTotal != null) setCostText(ingredientsCostTotal)
+  }
+
+  // فهرست کامل مواد اولیه‌ی شناخته‌شده (از کل دیتابیس غذا + مواد اولیه‌ی دستی) برای منوی «افزودن
+  // ماده اولیه» — انتخاب یک نام از این فهرست بلافاصله واحد و آخرین قیمت ثبت‌شده‌اش را می‌آورد،
+  // بدون نیاز به تایپ دستی. نگاه کنید به src/lib/ingredients.ts::buildIngredientRows.
+  const catalogRows = useMemo(() => buildIngredientRows(dishes, ingredientPriceLog, customIngredients), [dishes, ingredientPriceLog, customIngredients])
+  const usedNames = useMemo(() => new Set((form.ingredients ?? []).map((ing) => ing.name)), [form.ingredients])
+  const availableToAdd = useMemo(() => catalogRows.filter((r) => !usedNames.has(r.name)), [catalogRows, usedNames])
+  const availableByGroup = useMemo(() => {
+    const byGroup = new Map<string, typeof availableToAdd>()
+    for (const row of availableToAdd) {
+      const list = byGroup.get(row.group)
+      if (list) list.push(row)
+      else byGroup.set(row.group, [row])
+    }
+    return INGREDIENT_GROUP_ORDER.filter((g) => byGroup.has(g)).map((g) => ({ group: g, rows: byGroup.get(g)! }))
+  }, [availableToAdd])
+
+  const addIngredientRow = () => {
+    const row = catalogRows.find((r) => r.name === pickedIngredientName)
+    if (!row || newIngredientQuantity <= 0) return
+    const newIngredient: Ingredient = {
+      name: row.name,
+      quantity: newIngredientQuantity,
+      unit: row.unit,
+      unitPrice: row.unitPrice,
+      lineTotal: row.unitPrice != null ? row.unitPrice * newIngredientQuantity : null,
+    }
+    patch({ ingredients: [...(form.ingredients ?? []), newIngredient] })
+    setPickedIngredientName('')
+    setNewIngredientQuantity(100)
+  }
+
+  const removeIngredientRow = (index: number) => {
+    patch({ ingredients: (form.ingredients ?? []).filter((_, i) => i !== index) })
   }
 
   const handleSubmit = () => {
@@ -121,6 +162,8 @@ export function DishFormModal({
         defaultCookingMethodVerified: form.defaultCookingMethod != null,
         nutrition: form.nutrition,
         needsNutritionReview: false,
+        ingredients: form.ingredients,
+        ingredientsCostTotal: computeIngredientsCostTotal(form.ingredients),
       })
       onClose(dish.id)
     } else {
@@ -242,22 +285,24 @@ export function DishFormModal({
           </div>
         </div>
 
-        {displayIngredients.length > 0 && (
-          <div>
-            <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">مواد اولیه (کارت رسپی)</p>
-            <p className="mb-2 text-xs text-slate-400 dark:text-slate-500">
-              فی هر ماده اولیه را ویرایش کنید — بلافاصله ثبت می‌شود و چون قیمت هر ماده مستقل از این غذا نگه‌داری
-              می‌شود، روی همه‌ی غذاهای دیگری هم که از همان ماده استفاده می‌کنند اثر می‌گذارد (نگاه کنید به تب
-              «مواد اولیه»). این عدد مستقل از «هزینه هر پرس» بالاست، مگر اینکه با دکمه‌ی زیر آن را جایگزین کنید.
-            </p>
+        <div>
+          <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">مواد اولیه (کارت رسپی)</p>
+          <p className="mb-2 text-xs text-slate-400 dark:text-slate-500">
+            فی هر ماده اولیه را ویرایش کنید — بلافاصله ثبت می‌شود و چون قیمت هر ماده مستقل از این غذا نگه‌داری
+            می‌شود، روی همه‌ی غذاهای دیگری هم که از همان ماده استفاده می‌کنند اثر می‌گذارد (نگاه کنید به تب
+            «مواد اولیه»). این عدد مستقل از «هزینه هر پرس» بالاست، مگر اینکه با دکمه‌ی زیر آن را جایگزین کنید.
+          </p>
+
+          {displayIngredients.length > 0 ? (
             <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-              <table className="w-full min-w-[480px] text-sm">
+              <table className="w-full min-w-[520px] text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-start text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
                     <th className="px-3 py-2 text-start">نام ماده اولیه</th>
                     <th className="px-3 py-2 text-start">مقدار</th>
                     <th className="px-3 py-2 text-start">فی (ریال)</th>
                     <th className="px-3 py-2 text-start">جمع</th>
+                    <th className="px-3 py-2" />
                   </tr>
                 </thead>
                 <tbody>
@@ -273,21 +318,63 @@ export function DishFormModal({
                       <td className="px-3 py-2 whitespace-nowrap text-slate-600 dark:text-slate-400">
                         {ing.lineTotal != null ? formatRial(ing.lineTotal) : '—'}
                       </td>
+                      <td className="px-3 py-2">
+                        <button
+                          type="button"
+                          onClick={() => removeIngredientRow(i)}
+                          className="rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                        >
+                          حذف
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                جمع بهای مواد اولیه: <span className="font-semibold text-slate-800 dark:text-slate-200">{ingredientsCostTotal != null ? formatRial(ingredientsCostTotal) : '—'}</span>
-              </span>
-              <Button variant="outline" size="sm" onClick={applyIngredientsCostAsPrice} disabled={ingredientsCostTotal == null}>
-                استفاده از این مبلغ به‌عنوان قیمت غذا
-              </Button>
-            </div>
+          ) : (
+            <p className="rounded-lg border border-dashed border-slate-200 px-3 py-3 text-center text-xs text-slate-400 dark:border-slate-700 dark:text-slate-500">
+              هنوز ماده اولیه‌ای برای این غذا ثبت نشده.
+            </p>
+          )}
+
+          <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/40">
+            <Field label="افزودن ماده اولیه">
+              <select
+                value={pickedIngredientName}
+                onChange={(e) => setPickedIngredientName(e.target.value)}
+                className="w-56 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              >
+                <option value="">— انتخاب ماده اولیه —</option>
+                {availableByGroup.map(({ group, rows }) => (
+                  <optgroup key={group} label={group}>
+                    {rows.map((r) => (
+                      <option key={r.name} value={r.name}>
+                        {r.name} ({r.unit}
+                        {r.unitPrice != null ? `، ${formatRial(r.unitPrice)}` : ''})
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </Field>
+            <Field label="مقدار">
+              <NumberInput value={newIngredientQuantity} min={0} onChange={setNewIngredientQuantity} className="w-28" />
+            </Field>
+            <Button variant="outline" size="sm" onClick={addIngredientRow} disabled={!pickedIngredientName || newIngredientQuantity <= 0}>
+              + افزودن
+            </Button>
           </div>
-        )}
+
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
+            <span className="text-sm text-slate-600 dark:text-slate-400">
+              جمع بهای مواد اولیه: <span className="font-semibold text-slate-800 dark:text-slate-200">{ingredientsCostTotal != null ? formatRial(ingredientsCostTotal) : '—'}</span>
+            </span>
+            <Button variant="outline" size="sm" onClick={applyIngredientsCostAsPrice} disabled={ingredientsCostTotal == null}>
+              استفاده از این مبلغ به‌عنوان قیمت غذا
+            </Button>
+          </div>
+        </div>
 
         <div className="flex justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
           <Button variant="outline" onClick={() => onClose()}>
