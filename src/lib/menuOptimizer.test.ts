@@ -494,3 +494,54 @@ describe('14. proposal totalCost must equal costPerServing × servingCount for e
     expect(sawInflatedBatch).toBe(true)
   })
 })
+
+// ---------------------------------------------------------------------------
+// 15) رگرسیون: وقتی یک دسته چند گزینه دارد که هرکدام روی یک محور متفاوت (هزینه در برابر
+//     چگالی پروتئین) برتری دارند، Strategy های مختلف باید واقعاً بتوانند گزینه‌ی متفاوتی از
+//     همان دسته انتخاب کنند. قبلاً beamCombineAcrossCategories برای هر دسته فقط BEAM_WIDTH منوی
+//     جزئیِ برتر را بر اساس امتیاز خامِ «میانگین Dish Score تا این لحظه» نگه می‌داشت — چون این
+//     امتیاز میانگین بین همه‌ی دسته‌ها مشترک است (نه مخصوص هر Strategy)، اگر یک ترکیب خاص از یک
+//     دسته با هر چیزی امتیاز بالایی می‌گرفت، می‌توانست تنها بازمانده‌ی آن دسته در کل Beam شود —
+//     یعنی حتی وقتی cost-optimized و nutrition-optimized باید دو گزینه‌ی کاملاً متفاوت انتخاب
+//     کنند، هر دو مجبور بودند از همان یک گزینه‌ی بازمانده استفاده کنند. این دقیقاً همان چیزی است
+//     که کاربر «غذاهای تکراری، مستقل از فرمول انتخابی» گزارش کرد.
+// ---------------------------------------------------------------------------
+describe('15. cross-proposal variety — different strategies must be able to pick different options from the same category', () => {
+  it('cost-optimized and nutrition-optimized pick different پیش‌غذا options when the choices trade off cost vs. protein', () => {
+    const mains = Array.from({ length: 4 }, (_, i) => makeDish({ id: `main-${i}`, category: 'غذای اصلی', costPerServing: 300_000 + i * 5_000 }))
+    // یک گزینه‌ی ارزان و کم‌پروتئین (بهترین برای cost-optimized) و یک گزینه‌ی گران‌تر و
+    // پرپروتئین (بهترین برای nutrition-optimized) — به‌همراه دو گزینه‌ی میانی.
+    const starters = [
+      makeDish({ id: 'app-cheap', category: 'پیش‌غذا', costPerServing: 20_000, nutrition: { proteinGrams: 2, carbGrams: 15, fatGrams: 2, fiberGrams: null, calories: null } }),
+      makeDish({ id: 'app-mid-1', category: 'پیش‌غذا', costPerServing: 60_000, nutrition: { proteinGrams: 10, carbGrams: 15, fatGrams: 5, fiberGrams: null, calories: null } }),
+      makeDish({ id: 'app-mid-2', category: 'پیش‌غذا', costPerServing: 90_000, nutrition: { proteinGrams: 15, carbGrams: 15, fatGrams: 6, fiberGrams: null, calories: null } }),
+      makeDish({ id: 'app-protein', category: 'پیش‌غذا', costPerServing: 150_000, nutrition: { proteinGrams: 30, carbGrams: 15, fatGrams: 8, fiberGrams: null, calories: null } }),
+    ]
+    const others = [
+      makeDish({ id: 'dessert-1', category: 'دسر' }),
+      makeDish({ id: 'drink-1', category: 'نوشیدنی' }),
+    ]
+    const plan = makePlan({ guestCount: 100, perPersonBudget: 2_000_000 })
+    const testSettings: AppSettings = {
+      ...settings,
+      menuOptimizer: {
+        ...settings.menuOptimizer,
+        numberOfProposals: 5,
+        minDishesPerCategory: { ...settings.menuOptimizer.minDishesPerCategory, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+        maxDishesPerCategory: { ...settings.menuOptimizer.maxDishesPerCategory, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+      },
+    }
+    const { proposals } = generateMenuProposals([...mains, ...starters, ...others], plan, testSettings)
+
+    const starterPickFor = (strategyId: string) =>
+      proposals.find((p) => p.strategyId === strategyId)?.dishes.find((d) => d.category === 'پیش‌غذا')?.dishId
+
+    const costPick = starterPickFor('cost-optimized')
+    const nutritionPick = starterPickFor('nutrition-optimized')
+    expect(costPick).toBeDefined()
+    expect(nutritionPick).toBeDefined()
+    // اگر Beam زودتر از موعد فقط یک گزینه‌ی «پیش‌غذا» را زنده نگه دارد، این دو همیشه برابر
+    // می‌شوند — دقیقاً باگی که این تست باید از بازگشتش جلوگیری کند.
+    expect(costPick).not.toBe(nutritionPick)
+  })
+})

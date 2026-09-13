@@ -489,7 +489,10 @@ export function computeMenuScore({ dishes, costPerGuest, guestCount, settings, p
 // ---------------------------------------------------------------------------
 
 const SHORTLIST_SIZE_PER_CATEGORY = 10
-const BEAM_WIDTH = 40
+const BEAM_WIDTH = 150
+/** چند جفت‌شدن برتر (با منوی جزئی مرحله‌ی قبل) برای هر ترکیب متمایز یک دسته در Beam نگه داشته
+ * می‌شود — نگاه کنید به توضیح داخل beamCombineAcrossCategories. */
+const PER_COMBO_KEEP = 5
 
 interface CandidateDish {
   dish: Dish
@@ -644,12 +647,31 @@ function strategyPartialScore(dishes: CandidateDish[], strategy: MenuStrategyId)
 function beamCombineAcrossCategories(perCategoryCombos: CandidateDish[][][], strategy: MenuStrategyId): PartialMenu[] {
   let beam: PartialMenu[] = [{ dishes: [], avgScoreSoFar: 0 }]
   for (const combosForCategory of perCategoryCombos) {
-    const next: PartialMenu[] = []
+    // اگر همین‌جا صرفاً BEAM_WIDTH منوی جزئیِ برتر (بر اساس امتیاز خام) نگه داشته شود، وقتی یک
+    // ترکیب خاص از همین دسته (مثلاً یک زیرمجموعه‌ی «پیش‌غذا») واقعاً با هر چیزی امتیاز بالایی
+    // می‌گیرد، می‌تواند تنها بازمانده‌ی این دسته در کل Beam شود و همه‌ی گزینه‌های دیگر همین دسته
+    // را برای همیشه حذف کند — نتیجه: هر ۵ پیشنهاد نهایی، مستقل از Strategy، همان یک ترکیب ثابت
+    // «پیش‌غذا/نوشیدنی» را نشان می‌دهند (دقیقاً همان چیزی که کاربر «غذاهای تکراری» گزارش کرد).
+    // برای جلوگیری، به‌جای نگه‌داشتن فقط یک جفت‌شدن (که می‌تواند همیشه با همان «دسته‌ی غالبِ
+    // مراحل قبل» جفت شود و تنوع دسته‌های قبلی را هم همین‌جا از بین ببرد)، برای هر ترکیب متمایز
+    // همین دسته چند جفت‌شدن برتر (PER_COMBO_KEEP) با منوی‌های جزئی قبلی نگه داشته می‌شود — تا هم
+    // تنوع همین دسته و هم بخشی از تنوع دسته‌های قبلی تا انتهای جست‌وجو زنده بماند — و فقط بعد از
+    // آن BEAM_WIDTH نمونه‌ی برتر از میان همه‌ی این‌ها انتخاب می‌شود.
+    const byComboKey = new Map<string, PartialMenu[]>()
     for (const partial of beam) {
       for (const combo of combosForCategory) {
         const dishes = [...partial.dishes, ...combo]
-        next.push({ dishes, avgScoreSoFar: strategyPartialScore(dishes, strategy) })
+        const avgScoreSoFar = strategyPartialScore(dishes, strategy)
+        const comboKey = dishSetKey(combo.map((c) => c.dish))
+        const list = byComboKey.get(comboKey)
+        if (list) list.push({ dishes, avgScoreSoFar })
+        else byComboKey.set(comboKey, [{ dishes, avgScoreSoFar }])
       }
+    }
+    const next: PartialMenu[] = []
+    for (const list of byComboKey.values()) {
+      list.sort((a, b) => b.avgScoreSoFar - a.avgScoreSoFar)
+      next.push(...list.slice(0, PER_COMBO_KEEP))
     }
     next.sort((a, b) => b.avgScoreSoFar - a.avgScoreSoFar)
     beam = next.slice(0, BEAM_WIDTH)
@@ -780,24 +802,60 @@ export function generateMenuProposals(dishes: Dish[], plan: EventPlan, settings:
 
   const proposals: MenuProposal[] = []
   const usedSetKeys = new Set<string>()
+  // چند بار هر شناسه‌ی غذا تا این لحظه در یکی از پیشنهادهای قبلاً انتخاب‌شده حضور داشته —
+  // مبنای جریمه‌ی تنوع پایین‌تر (نگاه کنید به overlapPenalty).
+  const usedDishCounts = new Map<string, number>()
   const numberOfProposals = opt.numberOfProposals
   const strategyOrder: MenuStrategyId[] =
     numberOfProposals <= 3 ? ['best-balanced', 'cost-optimized', 'nutrition-optimized'] : [...MENU_STRATEGIES]
 
-  // هر Strategy را با وزن‌های خودش بازچینش می‌کند و بالاترین منوی هنوز-استفاده‌نشده را برمی‌دارد؛
-  // اگر تعداد پیشنهاد خواسته‌شده بیشتر از تعداد Strategy باشد (مثلاً ۱۰)، برای هر Strategy رتبه‌ی
-  // دوم/سوم هم اضافه می‌شود تا واقعاً «متفاوت» بمانند (نه تکرار همان منو با برچسب دیگر).
+  /**
+   * چرا این تابع لازم است: shortlistByCategory هر دسته را به یک کوتاه‌لیست ثابت (بر اساس Dish
+   * Score، مستقل از Strategy) محدود می‌کند؛ اگر در یک دسته چند غذا از نظر امتیاز خیلی به هم نزدیک
+   * باشند (مثلاً «پیش‌غذا» با ده‌ها گزینه‌ی قیمت‌دار)، ممکن است بالاترین‌امتیاز هر Strategy روی
+   * همان زیرمجموعه‌ی ثابت بیفتد و همه‌ی پیشنهادها در آن دسته عملاً یکی از آب دربیایند — همان
+   * چیزی که کاربر «غذاهای تکراری» می‌بیند: هر بار همان چند غذا، مستقل از فرمول/Strategy انتخابی.
+   * جمع می‌کند چند بار غذاهای یک ترکیب کاندید قبلاً در پیشنهادهای همین دور تولید استفاده شده‌اند.
+   */
+  function overlapPenalty(candidateDishes: Dish[]): number {
+    return candidateDishes.reduce((sum, d) => sum + (usedDishCounts.get(d.id) ?? 0), 0)
+  }
+
+  // چند امتیاز (از ۱۰۰) اجازه می‌دهیم برای انتخاب یک ترکیب کم‌تکرارتر به‌جای دقیقاً بالاترین‌امتیاز
+  // فدا شود — پنجره‌ای کوچک و محافظه‌کارانه تا کیفیت پیشنهاد قربانی تنوع نشود.
+  const DIVERSITY_SCORE_TOLERANCE_POINTS = 8
+  const DIVERSITY_CANDIDATE_WINDOW = 8
+
+  // هر Strategy را با وزن‌های خودش بازچینش می‌کند؛ در میان چند کاندید برتر هنوز-استفاده‌نشده که
+  // امتیازشان به بالاترین امتیاز نزدیک است، آن‌که کمترین همپوشانی غذا با پیشنهادهای قبلاً
+  // انتخاب‌شده دارد را برمی‌دارد (نه صرفاً رتبه‌ی اول را) — تا اگر تعداد پیشنهاد خواسته‌شده بیشتر
+  // از تعداد Strategy باشد، پیشنهادها واقعاً «متفاوت» بمانند، نه تکرار همان چند غذای ثابت با
+  // برچسب Strategy دیگر.
   let round = 0
   while (proposals.length < numberOfProposals && round < 5) {
     let addedThisRound = false
     for (const strategy of strategyOrder) {
       if (proposals.length >= numberOfProposals) break
-      const ranked = [...scoredMenus].sort(
-        (a, b) => overallScoreForStrategy(b.menuScore, strategy, opt.menuScoreWeights) - overallScoreForStrategy(a.menuScore, strategy, opt.menuScoreWeights),
-      )
-      const pick = ranked.find((m) => !usedSetKeys.has(dishSetKey(m.dishes)))
-      if (!pick) continue
+      const ranked = [...scoredMenus]
+        .filter((m) => !usedSetKeys.has(dishSetKey(m.dishes)))
+        .sort(
+          (a, b) => overallScoreForStrategy(b.menuScore, strategy, opt.menuScoreWeights) - overallScoreForStrategy(a.menuScore, strategy, opt.menuScoreWeights),
+        )
+      if (ranked.length === 0) continue
+
+      const topScore = overallScoreForStrategy(ranked[0].menuScore, strategy, opt.menuScoreWeights)
+      const candidateWindow = ranked
+        .slice(0, DIVERSITY_CANDIDATE_WINDOW)
+        .filter((m) => topScore - overallScoreForStrategy(m.menuScore, strategy, opt.menuScoreWeights) <= DIVERSITY_SCORE_TOLERANCE_POINTS)
+      // اگر امتیاز یکی از منوها به‌هردلیلی NaN شود (مثلاً داده‌ی ورودی ناقص)، مقایسه‌ی بالا با NaN
+      // همیشه false برمی‌گردد و candidateWindow می‌تواند خالی بماند — رتبه‌ی اول خام را به‌عنوان
+      // پشتیبان نگه می‌داریم تا موتور در بدترین حالت باز هم یک پیشنهاد معتبر برگرداند، نه کرش.
+      const pick = candidateWindow.length > 0
+        ? candidateWindow.reduce((best, m) => (overlapPenalty(m.dishes) < overlapPenalty(best.dishes) ? m : best))
+        : ranked[0]
+
       usedSetKeys.add(dishSetKey(pick.dishes))
+      for (const d of pick.dishes) usedDishCounts.set(d.id, (usedDishCounts.get(d.id) ?? 0) + 1)
       proposals.push(buildMenuProposal(pick, strategy, settings))
       addedThisRound = true
     }
