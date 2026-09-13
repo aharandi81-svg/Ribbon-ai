@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
+import { formatJalaliDateTime } from '../lib/format'
 import {
   clearSavedHandle,
   createNewDatabaseFile,
@@ -38,6 +39,7 @@ export function FileDatabaseBar() {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected')
   const [fileName, setFileName] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const handleRef = useRef<FileSystemFileHandle | null>(null)
 
   useEffect(() => {
@@ -73,7 +75,9 @@ export function FileDatabaseBar() {
       timer = window.setTimeout(() => {
         const handle = handleRef.current
         if (!handle) return
-        writeDatabaseFile(handle, buildSnapshot()).catch(() => setStatus('error'))
+        writeDatabaseFile(handle, buildSnapshot())
+          .then(() => setLastSavedAt(new Date().toISOString()))
+          .catch(() => setStatus('error'))
       }, 800)
     })
     return () => {
@@ -91,6 +95,7 @@ export function FileDatabaseBar() {
       await saveHandleForNextTime(result.handle)
       handleRef.current = result.handle
       setFileName(result.handle.name)
+      setLastSavedAt(result.snapshot.savedAt ?? null)
       setStatus('connected')
     } catch {
       setStatus('error')
@@ -106,6 +111,7 @@ export function FileDatabaseBar() {
       await saveHandleForNextTime(handle)
       handleRef.current = handle
       setFileName(handle.name)
+      setLastSavedAt(new Date().toISOString())
       setStatus('connected')
     } catch {
       setStatus('error')
@@ -126,6 +132,7 @@ export function FileDatabaseBar() {
     await clearSavedHandle()
     handleRef.current = null
     setFileName(null)
+    setLastSavedAt(null)
     setStatus('disconnected')
     setErrorMsg(null)
   }
@@ -146,6 +153,7 @@ export function FileDatabaseBar() {
             <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-400">
               ✓ ذخیره خودکار در «{fileName}»
             </span>
+            {lastSavedAt && <span className="text-xs text-slate-500">آخرین ذخیره: {formatJalaliDateTime(lastSavedAt)}</span>}
             <button
               type="button"
               onClick={() => void handleDisconnect()}
