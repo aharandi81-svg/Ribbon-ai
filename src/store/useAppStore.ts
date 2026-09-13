@@ -180,13 +180,31 @@ function reconcileSettings(persisted: Partial<AppSettings> | undefined): AppSett
   }
 }
 
-function reconcilePlan(persisted: Partial<EventPlan> | undefined): EventPlan {
+/**
+ * غذاهای حذف‌شده از کاتالوگ (مثلاً ادغام نسخه‌های تکراری در یک به‌روزرسانی دیتابیس) ممکن است
+ * هنوز در پلن ذخیره‌شده‌ی قدیمی کاربر (localStorage) رد پا داشته باشند. اگر پاک نشوند:
+ *   • یک dishConstraint «الزامی» روی شناسه‌ای که دیگر در dishesById نیست، در checkHardConstraints
+ *     برای هر ترکیب کاندید بدون استثنا رد می‌شود (چون آن شناسه هرگز در dishIds ترکیب حاضر نیست)
+ *     — یعنی موتور پیشنهاد منو برای همیشه صفر پیشنهاد برمی‌گرداند، بدون هیچ خطای قابل‌مشاهده،
+ *     و چون خودِ غذا از کاتالوگ حذف شده، کاربر حتی در دیتابیس غذا هم امکان دیدن/پاک‌کردن این
+ *     محدودیت را ندارد. این دقیقاً همان باگ «محاسبه منو هوشمند اصلاً کار نمی‌کند» است.
+ *   • یک selectedItem روی همان شناسه هم بی‌صدا از هر بخش‌بندی دسته‌ای ناپدید می‌شود (چون
+ *     dishesById.get آن هرگز match نمی‌کند) اما در state باقی می‌ماند — داده‌ی یتیمِ بی‌فایده.
+ * پس هر دو باید نسبت به فهرست واقعی dishIds موجود پالایش شوند.
+ */
+function reconcilePlan(persisted: Partial<EventPlan> | undefined, validDishIds: Set<string>): EventPlan {
   if (!persisted) return defaultEventPlan
+  const mergedConstraints = { ...defaultEventPlan.dishConstraints, ...persisted.dishConstraints }
+  const dishConstraints = Object.fromEntries(
+    Object.entries(mergedConstraints).filter(([dishId]) => validDishIds.has(dishId)),
+  )
+  const selectedItems = (persisted.selectedItems ?? defaultEventPlan.selectedItems).filter((item) => validDishIds.has(item.dishId))
   return {
     ...defaultEventPlan,
     ...persisted,
     categoryBudgetShare: { ...defaultEventPlan.categoryBudgetShare, ...persisted.categoryBudgetShare },
-    dishConstraints: { ...defaultEventPlan.dishConstraints, ...persisted.dishConstraints },
+    dishConstraints,
+    selectedItems,
   }
 }
 
@@ -213,13 +231,16 @@ export const useAppStore = create<AppState>()(
       },
 
       loadSnapshot: (snapshot) =>
-        set(() => ({
-          dishes: reconcileDishes(snapshot.dishes),
-          settings: reconcileSettings(snapshot.settings),
-          plan: reconcilePlan(snapshot.plan),
-          ingredientPriceLog: snapshot.ingredientPriceLog ?? {},
-          customIngredients: snapshot.customIngredients ?? {},
-        })),
+        set(() => {
+          const dishes = reconcileDishes(snapshot.dishes)
+          return {
+            dishes,
+            settings: reconcileSettings(snapshot.settings),
+            plan: reconcilePlan(snapshot.plan, new Set(dishes.map((d) => d.id))),
+            ingredientPriceLog: snapshot.ingredientPriceLog ?? {},
+            customIngredients: snapshot.customIngredients ?? {},
+          }
+        }),
 
       setPlanField: (key, value) =>
         set((state) => ({ plan: { ...state.plan, [key]: value } })),
@@ -428,11 +449,12 @@ export const useAppStore = create<AppState>()(
       version: 2,
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<AppState>
+        const dishes = reconcileDishes(p.dishes)
         return {
           ...current,
-          dishes: reconcileDishes(p.dishes),
+          dishes,
           settings: reconcileSettings(p.settings),
-          plan: reconcilePlan(p.plan),
+          plan: reconcilePlan(p.plan, new Set(dishes.map((d) => d.id))),
           // ذخیره‌شده در localStorage و دیتای کاملاً جدید و کاربرساخته است، هیچ‌وقت با کاتالوگ
           // تازه‌ی dishes.json تداخل ندارد — پس برخلاف dishes، نیازی به reconcile ندارد.
           ingredientPriceLog: p.ingredientPriceLog ?? {},
