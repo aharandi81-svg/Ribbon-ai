@@ -6,6 +6,7 @@ import { RecommendationsPage } from './pages/RecommendationsPage'
 import { DishDatabasePage } from './pages/DishDatabasePage'
 import { IngredientsPage } from './pages/IngredientsPage'
 import { FileDatabaseBar } from './components/FileDatabaseBar'
+import { MysqlSyncBar } from './components/MysqlSyncBar'
 
 const TABS = [
   { id: 'settings', label: 'تنظیمات رویداد', Component: EventSettingsPage },
@@ -72,7 +73,8 @@ function App() {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
         </div>
-        <div className="flex justify-end px-4 pb-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-end gap-1.5 px-4 pb-3 sm:px-6 lg:px-8">
+          <MysqlSyncBar />
           <FileDatabaseBar />
         </div>
         <div className="h-1 w-full bg-amber-400" />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 import { formatJalaliDateTime } from '../lib/format'
+import { buildAppSnapshot } from '../lib/snapshot'
 import {
   clearSavedHandle,
   createNewDatabaseFile,
@@ -10,23 +11,9 @@ import {
   saveHandleForNextTime,
   verifyPermission,
   writeDatabaseFile,
-  type DatabaseSnapshot,
 } from '../lib/fileStorage'
 
 type ConnectionStatus = 'checking' | 'disconnected' | 'needs-permission' | 'connected' | 'saving' | 'error'
-
-function buildSnapshot(): DatabaseSnapshot {
-  const s = useAppStore.getState()
-  return {
-    fileFormatVersion: 1,
-    savedAt: new Date().toISOString(),
-    dishes: s.dishes,
-    plan: s.plan,
-    settings: s.settings,
-    ingredientPriceLog: s.ingredientPriceLog,
-    customIngredients: s.customIngredients,
-  }
-}
 
 /** نوار وضعیت «فایل دیتابیس واقعی» در هدر — به کاربر اجازه می‌دهد کل وضعیت برنامه (دیتابیس غذا،
  * سناریو، تنظیمات، لاگ قیمت مواد اولیه) را به یک فایل JSON واقعی روی کامپیوتر خودش وصل کند؛ از آن
@@ -75,7 +62,7 @@ export function FileDatabaseBar() {
       timer = window.setTimeout(() => {
         const handle = handleRef.current
         if (!handle) return
-        writeDatabaseFile(handle, buildSnapshot())
+        writeDatabaseFile(handle, buildAppSnapshot())
           .then(() => setLastSavedAt(new Date().toISOString()))
           .catch(() => setStatus('error'))
       }, 800)
@@ -106,7 +93,7 @@ export function FileDatabaseBar() {
   const handleCreate = async () => {
     setErrorMsg(null)
     try {
-      const handle = await createNewDatabaseFile(buildSnapshot())
+      const handle = await createNewDatabaseFile(buildAppSnapshot())
       if (!handle) return
       await saveHandleForNextTime(handle)
       handleRef.current = handle
