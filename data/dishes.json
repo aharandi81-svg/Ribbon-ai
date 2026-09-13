@@ -1,180 +1,5 @@
 [
   {
-    "id": "001-shrimp-fried-rice",
-    "name": "shrimp fried rice",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 22.1,
-      "protein": 42.6,
-      "veg": 28.4,
-      "fat": 6.9
-    },
-    "costPerServing": 8597560.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت15 , 17 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "برنج ایرانی",
-        "quantity": 110,
-        "unit": "گرم",
-        "unitPrice": 5000,
-        "lineTotal": 550000
-      },
-      {
-        "name": "میگو 16/20 با دم",
-        "quantity": 220,
-        "unit": "گرم",
-        "unitPrice": 35000,
-        "lineTotal": 7700000
-      },
-      {
-        "name": "روغن سرخ کردنی",
-        "quantity": 30,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 150000
-      },
-      {
-        "name": "گوجه فرنگی",
-        "quantity": 80,
-        "unit": "گرم",
-        "unitPrice": 890,
-        "lineTotal": 71200
-      },
-      {
-        "name": "فلفل دلمه رنگی",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 530,
-        "lineTotal": 26500
-      },
-      {
-        "name": "جعفری",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 22500
-      },
-      {
-        "name": "رب گوجه",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 2300,
-        "lineTotal": 34500
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 8700
-      },
-      {
-        "name": "زردچوبه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 8000,
-        "lineTotal": 8000
-      },
-      {
-        "name": "فلفل پاپریکا",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 10000,
-        "lineTotal": 10000
-      },
-      {
-        "name": "زیره سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 30000,
-        "lineTotal": 15000
-      }
-    ],
-    "ingredientsCostTotal": 8597560,
-    "referencePortionGrams": 526,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 224.1,
-      "carbGrams": 116.2,
-      "fatGrams": 36.3,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "002-آب-پرتقال",
-    "name": "آب پرتقال",
-    "category": "نوشیدنی",
-    "macro": {
-      "carb": 75,
-      "protein": 5,
-      "veg": 5,
-      "fat": 15
-    },
-    "costPerServing": 3900000.0,
-    "costSource": "آخرین قیمت ثبت‌شده از 3 رویداد (نوسان بالا، احتمالاً بر اثر گذر زمان/تورم)",
-    "priceVarianceFlag": true,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 23تیر ",
-      "ایونت15 , 17 مرداد ",
-      "ایونت 18 مرداد ",
-      "اوا تجارت -524",
-      "نوونوردیسک 524",
-      "ایونت ترنج 525",
-      "نوونوردیسک 526"
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 250,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "قابل‌نگهداری",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 12.5,
-      "carbGrams": 187.5,
-      "fatGrams": 37.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
-  },
-  {
     "id": "003-آبجوی-بدون-الکل",
     "name": "آبجوی بدون الکل",
     "category": "نوشیدنی",
@@ -213,8 +38,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "004-آدانا-کباب",
@@ -232,7 +57,10 @@
     "needsPrice": false,
     "eventsUsedIn": [
       "ایونت 19 تیر",
-      "ایونت 22 تیر "
+      "ایونت 22 تیر ",
+      "ایونت فوتبال ",
+      "ایونت 18 مرداد ",
+      "ایونت ترنج 525"
     ],
     "ingredients": [
       {
@@ -314,110 +142,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "کبابی",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "005-آدنا-رولی",
-    "name": "آدنا رولی",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 13.6,
-      "protein": 26.0,
-      "veg": 40.6,
-      "fat": 19.8
-    },
-    "costPerServing": 3034894.0,
-    "costSource": "میانه 2 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 18 مرداد ",
-      "ایونت ترنج 525"
-    ],
-    "ingredients": [
-      {
-        "name": "نخودی",
-        "quantity": 150,
-        "unit": "گرم",
-        "unitPrice": 16633.56,
-        "lineTotal": 2495034
-      },
-      {
-        "name": "فلفل دلمه رنگی",
-        "quantity": 35,
-        "unit": "گرم",
-        "unitPrice": 530,
-        "lineTotal": 18550
-      },
-      {
-        "name": "ادویه سون اسپایس",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 42000,
-        "lineTotal": 84000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "جعفری",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 15000
-      },
-      {
-        "name": "سس تاباسکو",
-        "quantity": 5,
-        "unit": "سی سی",
-        "unitPrice": 80000,
-        "lineTotal": 400000
-      },
-      {
-        "name": "پیاز",
-        "quantity": 35,
-        "unit": "گرم",
-        "unitPrice": 480,
-        "lineTotal": 16800
-      }
-    ],
-    "ingredientsCostTotal": 3034894,
-    "referencePortionGrams": 240,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 62.4,
-      "carbGrams": 32.6,
-      "fatGrams": 47.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "006-آلبالو-پلو-با-گوشت-قلقلی-زعفرانی",
@@ -543,8 +268,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "007-آناناس",
@@ -586,7 +311,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "008-آنترومه-نارگیلی",
@@ -629,7 +354,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "009-اب-پرتقال-طبیعی",
@@ -646,7 +371,14 @@
     "priceVarianceFlag": false,
     "needsPrice": true,
     "eventsUsedIn": [
-      "ایونت 5 مرداد "
+      "ایونت 5 مرداد ",
+      "ایونت 23تیر ",
+      "ایونت15 , 17 مرداد ",
+      "ایونت 18 مرداد ",
+      "اوا تجارت -524",
+      "نوونوردیسک 524",
+      "ایونت ترنج 525",
+      "نوونوردیسک 526"
     ],
     "ingredients": null,
     "ingredientsCostTotal": null,
@@ -670,8 +402,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "010-ابدوغ-خیار-مجلسی",
@@ -779,110 +511,11 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "011-ادنا-کباب-لقمه-ای",
-    "name": "ادنا کباب لقمه ای",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 13.6,
-      "protein": 26.0,
-      "veg": 40.6,
-      "fat": 19.8
-    },
-    "costPerServing": 3034894.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت فوتبال "
-    ],
-    "ingredients": [
-      {
-        "name": "نخودی",
-        "quantity": 150,
-        "unit": "گرم",
-        "unitPrice": 16633.56,
-        "lineTotal": 2495034
-      },
-      {
-        "name": "فلفل دلمه رنگی",
-        "quantity": 35,
-        "unit": "گرم",
-        "unitPrice": 530,
-        "lineTotal": 18550
-      },
-      {
-        "name": "ادویه سون اسپایس",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 42000,
-        "lineTotal": 84000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "جعفری",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 15000
-      },
-      {
-        "name": "سس تاباسکو",
-        "quantity": 5,
-        "unit": "سی سی",
-        "unitPrice": 80000,
-        "lineTotal": 400000
-      },
-      {
-        "name": "پیاز",
-        "quantity": 35,
-        "unit": "گرم",
-        "unitPrice": 480,
-        "lineTotal": 16800
-      }
-    ],
-    "ingredientsCostTotal": 3034894,
-    "referencePortionGrams": 240,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 62.4,
-      "carbGrams": 32.6,
-      "fatGrams": 47.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "red-meat",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "کبابی",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "012-استافد-چیکن",
-    "name": "استافد چیکن",
+    "id": "013-استافد-چیکن-با-تره-فرنگی-و-موزارلا",
+    "name": "استافد چیکن با تره فرنگی و موزارلا",
     "category": "غذای اصلی",
     "macro": {
       "carb": 5.9,
@@ -891,10 +524,11 @@
       "fat": 14.7
     },
     "costPerServing": 2952510.0,
-    "costSource": "میانه 2 رویداد",
+    "costSource": "تک رویداد",
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت11 تیر ",
       "ایونت 31 تیر و 2 مرداد  ",
       "ایونت 5 مرداد "
     ],
@@ -998,132 +632,12 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "013-استافد-چیکن-با-تره-فرنگی-و-موزارلا",
-    "name": "استافد چیکن با تره فرنگی و موزارلا",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 5.9,
-      "protein": 75.3,
-      "veg": 4.1,
-      "fat": 14.7
-    },
-    "costPerServing": 2952510.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت11 تیر "
-    ],
-    "ingredients": [
-      {
-        "name": "سینه مرغ بدون کتف",
-        "quantity": 200,
-        "unit": "گرم",
-        "unitPrice": 7300,
-        "lineTotal": 1460000
-      },
-      {
-        "name": "پنیر موزارلا",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 23000,
-        "lineTotal": 690000
-      },
-      {
-        "name": "تره فرنگی",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 25000
-      },
-      {
-        "name": "خردل دیژون",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 21000,
-        "lineTotal": 105000
-      },
-      {
-        "name": "شیر نارگیل",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 10000,
-        "lineTotal": 150000
-      },
-      {
-        "name": "فندوق درجه یک ایرانی",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 40000,
-        "lineTotal": 400000
-      },
-      {
-        "name": "رب کاری",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 9000,
-        "lineTotal": 18000
-      },
-      {
-        "name": "عسل",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 12000,
-        "lineTotal": 24000
-      },
-      {
-        "name": "روغن سرخ کردنی",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 75000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      }
-    ],
-    "ingredientsCostTotal": 2952510,
-    "referencePortionGrams": 292,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 219.9,
-      "carbGrams": 17.2,
-      "fatGrams": 42.9,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "white-meat",
-    "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "014-اسپرینگ-رول",
-    "name": "اسپرینگ رول",
+    "id": "015-اسپرینگ-رول-سبزیجات",
+    "name": "اسپرینگ رول سبزیجات",
     "category": "پیش‌غذا",
     "macro": {
       "carb": 30,
@@ -1132,10 +646,12 @@
       "fat": 10
     },
     "costPerServing": 117020.0,
-    "costSource": "آخرین قیمت ثبت‌شده از 3 رویداد (نوسان بالا، احتمالاً بر اثر گذر زمان/تورم)",
-    "priceVarianceFlag": true,
+    "costSource": "تک رویداد",
+    "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت پاد ",
+      "ایونت 19 تیر",
       "ایونت 23تیر ",
       "ایونت فوتبال ",
       "ایونت ترنج 525"
@@ -1207,7 +723,7 @@
       {
         "name": "نان یوفکا",
         "quantity": 0.15,
-        "unit": "گرم",
+        "unit": "عدد",
         "unitPrice": 4600,
         "lineTotal": 690
       },
@@ -1220,9 +736,9 @@
       }
     ],
     "ingredientsCostTotal": 117020,
-    "referencePortionGrams": 150,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
+    "referencePortionGrams": 86.8,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
+    "needsPortionEstimate": false,
     "dietaryTags": [
       "گیاهی"
     ],
@@ -1242,252 +758,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "015-اسپرینگ-رول-سبزیجات",
-    "name": "اسپرینگ رول سبزیجات",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 30,
-      "protein": 10,
-      "veg": 50,
-      "fat": 10
-    },
-    "costPerServing": 117020.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت پاد "
-    ],
-    "ingredients": [
-      {
-        "name": "هویچ",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 750,
-        "lineTotal": 11250
-      },
-      {
-        "name": "کلم سفید",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 300,
-        "lineTotal": 6000
-      },
-      {
-        "name": "کلم بنفش",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 780,
-        "lineTotal": 15600
-      },
-      {
-        "name": "قارچ دکمه ای",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1900,
-        "lineTotal": 19000
-      },
-      {
-        "name": "پیازچه",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 7500
-      },
-      {
-        "name": "سویا سس",
-        "quantity": 5,
-        "unit": "سی سی",
-        "unitPrice": 6580,
-        "lineTotal": 32900
-      },
-      {
-        "name": "روعن سرخ کردنی",
-        "quantity": 2,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 10000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سفید",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 20000,
-        "lineTotal": 10000
-      },
-      {
-        "name": "نان یوفکا",
-        "quantity": 0.15,
-        "unit": "گرم",
-        "unitPrice": 4600,
-        "lineTotal": 690
-      },
-      {
-        "name": "تخم مرغ",
-        "quantity": 0.025,
-        "unit": "عدد",
-        "unitPrice": 140000,
-        "lineTotal": 3500
-      }
-    ],
-    "ingredientsCostTotal": 117020,
-    "referencePortionGrams": 150,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 15.0,
-      "carbGrams": 45.0,
-      "fatGrams": 15.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "016-اسپرینگ-رول-سبزیچات-وگن",
-    "name": "اسپرینگ رول سبزیچات (وگن)",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 30,
-      "protein": 5,
-      "veg": 55,
-      "fat": 10
-    },
-    "costPerServing": 117020.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 19 تیر"
-    ],
-    "ingredients": [
-      {
-        "name": "هویچ",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 750,
-        "lineTotal": 11250
-      },
-      {
-        "name": "کلم سفید",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 300,
-        "lineTotal": 6000
-      },
-      {
-        "name": "کلم بنفش",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 780,
-        "lineTotal": 15600
-      },
-      {
-        "name": "قارچ دکمه ای",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1900,
-        "lineTotal": 19000
-      },
-      {
-        "name": "پیازچه",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 7500
-      },
-      {
-        "name": "سویا سس",
-        "quantity": 5,
-        "unit": "سی سی",
-        "unitPrice": 6580,
-        "lineTotal": 32900
-      },
-      {
-        "name": "روعن سرخ کردنی",
-        "quantity": 2,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 10000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سفید",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 20000,
-        "lineTotal": 10000
-      },
-      {
-        "name": "نان یوفکا",
-        "quantity": 0.15,
-        "unit": "گرم",
-        "unitPrice": 4600,
-        "lineTotal": 690
-      },
-      {
-        "name": "تخم مرغ",
-        "quantity": 0.025,
-        "unit": "عدد",
-        "unitPrice": 140000,
-        "lineTotal": 3500
-      }
-    ],
-    "ingredientsCostTotal": 117020,
-    "referencePortionGrams": 350,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 17.5,
-      "carbGrams": 105.0,
-      "fatGrams": 35.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "017-اسکویید-استافد",
@@ -1578,8 +850,8 @@
     "needsNutritionReview": false,
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "018-املت-ایرانی",
@@ -1666,8 +938,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "019-املت-شاکشوکا",
@@ -1774,8 +1046,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "020-انواع-دیپ",
@@ -1817,7 +1089,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "021-انواع-قهوه-گرم",
@@ -1858,13 +1130,13 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "022-انوع-نان",
     "name": "انوع نان",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 35,
       "protein": 35,
@@ -1900,8 +1172,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "023-باباغنوش",
@@ -2005,8 +1277,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "024-بادام-زمینی-روکش-دار",
@@ -2048,7 +1320,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "025-بار-سرد-و-گرم",
@@ -2089,8 +1361,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "026-باقالی-پلو-با-گردن",
@@ -2202,12 +1474,12 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "027-برنج-اعلای-ایرانی",
-    "name": "برنج اعلای ایرانی",
+    "id": "028-برنج-سفید",
+    "name": "برنج سفید",
     "category": "غذای اصلی",
     "macro": {
       "carb": 90.0,
@@ -2216,10 +1488,17 @@
       "fat": 8.5
     },
     "costPerServing": 647900.0,
-    "costSource": "میانه 2 رویداد",
+    "costSource": "میانه 7 رویداد",
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت 22 تیر ",
+      "ایونت 23تیر ",
+      "ایونت 5 مرداد ",
+      "ایونت 9 مرداد ",
+      "ایونت15 , 17 مرداد ",
+      "نوونوردیسک 524",
+      "ایونت اکتوورکو  630",
       "ایونت11 تیر ",
       "ایونت 31 تیر و 2 مرداد  "
     ],
@@ -2270,81 +1549,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "028-برنج-سفید",
-    "name": "برنج سفید",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 90.0,
-      "protein": 0.7,
-      "veg": 0.7,
-      "fat": 8.5
-    },
-    "costPerServing": 647900.0,
-    "costSource": "میانه 7 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 22 تیر ",
-      "ایونت 23تیر ",
-      "ایونت 5 مرداد ",
-      "ایونت 9 مرداد ",
-      "ایونت15 , 17 مرداد ",
-      "نوونوردیسک 524",
-      "ایونت اکتوورکو  630"
-    ],
-    "ingredients": [
-      {
-        "name": "برنج ایرانی",
-        "quantity": 120,
-        "unit": "گرم",
-        "unitPrice": 5000,
-        "lineTotal": 600000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 2900
-      },
-      {
-        "name": "روغن پخت و پز",
-        "quantity": 10,
-        "unit": "سی سی",
-        "unitPrice": 4500,
-        "lineTotal": 45000
-      }
-    ],
-    "ingredientsCostTotal": 647900,
-    "referencePortionGrams": 135,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 0.9,
-      "carbGrams": 121.5,
-      "fatGrams": 11.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "029-بستنی",
@@ -2386,7 +1592,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "030-بستنی-جلاتو",
@@ -2428,12 +1634,12 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "031-بشقاب-پنیر-و-زیتون",
     "name": "بشقاب پنیر و زیتون",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 35,
       "protein": 35,
@@ -2469,8 +1675,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "032-بورانی-اسفناج",
@@ -2490,7 +1696,8 @@
       "ایونت11 تیر ",
       "ایونت 22 تیر ",
       "ایونت 23تیر ",
-      "ایونت 31 تیر و 2 مرداد  "
+      "ایونت 31 تیر و 2 مرداد  ",
+      "ایونت 9 مرداد "
     ],
     "ingredients": [
       {
@@ -2546,7 +1753,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "033-بوفالو-وینگز",
@@ -2679,51 +1886,8 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "034-بوفه-نان",
-    "name": "بوفه نان",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 35,
-      "protein": 35,
-      "veg": 20,
-      "fat": 10
-    },
-    "costPerServing": null,
-    "costSource": "خرید از بیرون",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
-      "ایونت 22 تیر ",
-      "ایونت15 , 17 مرداد "
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 350,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 122.5,
-      "carbGrams": 122.5,
-      "fatGrams": 35.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "035-بوفه-نان-بریوش-و-سیمیت-و-تست",
@@ -2741,7 +1905,9 @@
     "needsPrice": true,
     "eventsUsedIn": [
       "نوونوردیسک 524",
-      "نوونوردیسک 526"
+      "نوونوردیسک 526",
+      "ایونت 22 تیر ",
+      "ایونت15 , 17 مرداد "
     ],
     "ingredients": null,
     "ingredientsCostTotal": null,
@@ -2765,8 +1931,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "036-بیف-استراگانف",
@@ -2906,8 +2072,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "خورشتی/آرام‌پز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "037-تا-ی-چیلی-و-دیپ-پنیر",
@@ -2949,12 +2115,12 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "038-تارت-خاویار-با-خامه-ترش",
     "name": "تارت خاویار با خامه ترش",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 61.0,
       "protein": 14.4,
@@ -3019,8 +2185,8 @@
     "needsNutritionReview": false,
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "039-تارت-شکلات-و-کارامل",
@@ -3037,48 +2203,7 @@
     "priceVarianceFlag": false,
     "needsPrice": true,
     "eventsUsedIn": [
-      "ایونت15 , 17 مرداد "
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 120,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "قابل‌نگهداری",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 6.0,
-      "carbGrams": 66.0,
-      "fatGrams": 42.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "040-تارت-کارامل-شکلات",
-    "name": "تارت کارامل شکلات",
-    "category": "دسر",
-    "macro": {
-      "carb": 55,
-      "protein": 5,
-      "veg": 5,
-      "fat": 35
-    },
-    "costPerServing": null,
-    "costSource": "بدون داده هزینه",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
+      "ایونت15 , 17 مرداد ",
       "نوونوردیسک 526"
     ],
     "ingredients": null,
@@ -3103,82 +2228,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "041-ترتیلا-با-انواع-دیپ-چیپس-ترتیلا-با-چیلی-تای",
-    "name": "ترتیلا با انواع دیپ (چیپس ترتیلا با چیلی تای )",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 39.5,
-      "protein": 8.9,
-      "veg": 8.9,
-      "fat": 42.8
-    },
-    "costPerServing": 1031208.38,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت فوتبال "
-    ],
-    "ingredients": [
-      {
-        "name": "نان ترتیلا بزرگ",
-        "quantity": 1.5,
-        "unit": "عدد",
-        "unitPrice": 250000,
-        "lineTotal": 375000
-      },
-      {
-        "name": "فلفل پاپریکا",
-        "quantity": 3,
-        "unit": "گرم",
-        "unitPrice": 10000,
-        "lineTotal": 30000
-      },
-      {
-        "name": "روغن سرخ کردنی",
-        "quantity": 50,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 250000
-      },
-      {
-        "name": "سس چیلی تای",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 7524.17,
-        "lineTotal": 376208.38
-      }
-    ],
-    "ingredientsCostTotal": 1031208.38,
-    "referencePortionGrams": 148,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 13.2,
-      "carbGrams": 58.5,
-      "fatGrams": 63.3,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "042-تست-تخم-مرغ-و-بیکن",
@@ -3251,7 +2302,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "043-تست-رست-بیف",
@@ -3357,7 +2408,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "044-تست-شکلات-و-توت-فرنگی",
@@ -3424,8 +2475,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "045-تست-موز-و-بادام-زمینی",
@@ -3492,8 +2543,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "046-تست-ژامبون",
@@ -3570,8 +2621,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "047-تمپورا-سبزیجات",
@@ -3673,8 +2724,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "048-ته-چین",
@@ -3715,114 +2766,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "049-ته-چین-ایرانی",
-    "name": "ته چین ایرانی",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 28.2,
-      "protein": 40.7,
-      "veg": 19.7,
-      "fat": 11.4
-    },
-    "costPerServing": 1973060.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 9 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "تخم مرغ",
-        "quantity": 1,
-        "unit": "عدد",
-        "unitPrice": 140000,
-        "lineTotal": 140000
-      },
-      {
-        "name": "گلاب",
-        "quantity": 2,
-        "unit": "سی سی",
-        "unitPrice": 2500,
-        "lineTotal": 5000
-      },
-      {
-        "name": "روغن پخت و پز",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 4500,
-        "lineTotal": 67500
-      },
-      {
-        "name": "بادمجان",
-        "quantity": 60,
-        "unit": "گرم",
-        "unitPrice": 700,
-        "lineTotal": 42000
-      },
-      {
-        "name": "سردست گوساله",
-        "quantity": 60,
-        "unit": "گرم",
-        "unitPrice": 19500,
-        "lineTotal": 1170000
-      },
-      {
-        "name": "زرشک اعلا",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 8800,
-        "lineTotal": 88000
-      },
-      {
-        "name": "زعفران",
-        "quantity": 0.02,
-        "unit": "گرم",
-        "unitPrice": 603000,
-        "lineTotal": 12060
-      },
-      {
-        "name": "برنج ایرانی",
-        "quantity": 75,
-        "unit": "گرم",
-        "unitPrice": 5000,
-        "lineTotal": 375000
-      },
-      {
-        "name": "ماست یونانی",
-        "quantity": 35,
-        "unit": "گرم",
-        "unitPrice": 2100,
-        "lineTotal": 73500
-      }
-    ],
-    "ingredientsCostTotal": 1973060,
-    "referencePortionGrams": 307,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 124.9,
-      "carbGrams": 86.6,
-      "fatGrams": 35.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "red-meat",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "050-ته-چین-ته-دیگی",
@@ -3908,8 +2853,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "051-ته-چین-مرغ-و-اسفناج",
@@ -4021,8 +2966,8 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "052-ته-چین-گوشت-و-بادنجان",
@@ -4041,7 +2986,8 @@
     "eventsUsedIn": [
       "ایونت11 تیر ",
       "ایونت 23تیر ",
-      "ایونت 31 تیر و 2 مرداد  "
+      "ایونت 31 تیر و 2 مرداد  ",
+      "ایونت 9 مرداد "
     ],
     "ingredients": [
       {
@@ -4129,8 +3075,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "053-توت-فرنگی",
@@ -4171,121 +3117,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "054-توسکانی-مرغ",
-    "name": "توسکانی مرغ",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 7.0,
-      "protein": 46.3,
-      "veg": 28.4,
-      "fat": 18.3
-    },
-    "costPerServing": null,
-    "costSource": "بدون داده هزینه",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
-      "ایونت 23تیر "
-    ],
-    "ingredients": [
-      {
-        "name": "سینه مرغ بدون کتف",
-        "quantity": 150,
-        "unit": "گرم",
-        "unitPrice": 7300,
-        "lineTotal": 1095000
-      },
-      {
-        "name": "خامه صورتی",
-        "quantity": 70,
-        "unit": "گرم",
-        "unitPrice": 9700,
-        "lineTotal": 679000
-      },
-      {
-        "name": "روغن سرخ کردنی",
-        "quantity": 20,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 100000
-      },
-      {
-        "name": "گوجه خشک",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 20000,
-        "lineTotal": 400000
-      },
-      {
-        "name": "سیر",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 12500
-      },
-      {
-        "name": "شیر مدت دار",
-        "quantity": 30,
-        "unit": "سی سی",
-        "unitPrice": 1600,
-        "lineTotal": 48000
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "اورگانو",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 9000,
-        "lineTotal": 9000
-      },
-      {
-        "name": "اسفناج",
-        "quantity": 60,
-        "unit": "گرم",
-        "unitPrice": 1000,
-        "lineTotal": 60000
-      },
-      {
-        "name": "قارچ دکمه‌ای",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 1900,
-        "lineTotal": 95000
-      }
-    ],
-    "ingredientsCostTotal": 2502850,
-    "referencePortionGrams": 406,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 188.0,
-      "carbGrams": 28.4,
-      "fatGrams": 74.3,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "white-meat",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "055-تیرامیسو",
@@ -4328,49 +3161,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "056-جار-ترس-لچر-سه-شیر",
-    "name": "جار ترس لچر (سه شیر)",
-    "category": "دسر",
-    "macro": {
-      "carb": 55,
-      "protein": 5,
-      "veg": 5,
-      "fat": 35
-    },
-    "costPerServing": null,
-    "costSource": "خرید از بیرون",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
-      "ایونت فوتبال "
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 120,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 6.0,
-      "carbGrams": 66.0,
-      "fatGrams": 42.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "057-جار-تیرامیسو",
@@ -4387,48 +3178,7 @@
     "priceVarianceFlag": false,
     "needsPrice": true,
     "eventsUsedIn": [
-      "ایونت فوتبال "
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 120,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 6.0,
-      "carbGrams": 66.0,
-      "fatGrams": 42.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "058-جار-تیرامیسو-یک-نفره",
-    "name": "جار تیرامیسو یک نفره",
-    "category": "دسر",
-    "macro": {
-      "carb": 55,
-      "protein": 5,
-      "veg": 5,
-      "fat": 35
-    },
-    "costPerServing": null,
-    "costSource": "بدون داده هزینه",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
+      "ایونت فوتبال ",
       "ایونت 22 تیر "
     ],
     "ingredients": null,
@@ -4453,8 +3203,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "059-جار-فریز-یک-نفره",
@@ -4496,12 +3246,12 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "060-جار-کیک-سه-شیر-یک-نفره",
     "name": "جار کیک سه شیر یک نفره",
-    "category": "نوشیدنی",
+    "category": "دسر",
     "macro": {
       "carb": 75,
       "protein": 5,
@@ -4513,7 +3263,8 @@
     "priceVarianceFlag": false,
     "needsPrice": true,
     "eventsUsedIn": [
-      "ایونت 22 تیر "
+      "ایونت 22 تیر ",
+      "ایونت فوتبال "
     ],
     "ingredients": null,
     "ingredientsCostTotal": null,
@@ -4537,8 +3288,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "061-جوجه-کباب",
@@ -4644,7 +3395,7 @@
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "کبابی",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "062-حلیم-بوقلمون",
@@ -4685,8 +3436,8 @@
     "needsNutritionReview": true,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "خورشتی/آرام‌پز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "063-حمص",
@@ -4709,175 +3460,7 @@
       "ایونت فوتبال ",
       "ایونت 31 تیر و 2 مرداد  ",
       "ایونت 5 مرداد ",
-      "ایونت 9 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "نخود",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 3900,
-        "lineTotal": 195000
-      },
-      {
-        "name": "ارده عقاب",
-        "quantity": 40,
-        "unit": "گرم",
-        "unitPrice": 12000,
-        "lineTotal": 480000
-      },
-      {
-        "name": "سیر",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 12500
-      },
-      {
-        "name": "ماست یونانی",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 2100,
-        "lineTotal": 21000
-      },
-      {
-        "name": "روغن زیتون حلب با بو",
-        "quantity": 40,
-        "unit": "سی سی",
-        "unitPrice": 35000,
-        "lineTotal": 1400000
-      },
-      {
-        "name": "آبلیمو طبیعی",
-        "quantity": 20,
-        "unit": "سی سی",
-        "unitPrice": 4000,
-        "lineTotal": 80000
-      },
-      {
-        "name": "جوهر لیمو",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 6300,
-        "lineTotal": 6300
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 8700
-      }
-    ],
-    "ingredientsCostTotal": 2204660,
-    "referencePortionGrams": 169,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 23.7,
-      "carbGrams": 27.9,
-      "fatGrams": 90.9,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "064-حمص-و-ترتیلا",
-    "name": "حمص و ترتیلا",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 28.6,
-      "protein": 23.8,
-      "veg": 23.8,
-      "fat": 23.8
-    },
-    "costPerServing": 568665.0,
-    "costSource": "میانه 2 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت ترنج 525",
-      "نوونوردیسک 526"
-    ],
-    "ingredients": [
-      {
-        "name": "حمص",
-        "quantity": 42.25,
-        "unit": "گرم",
-        "unitPrice": 13045.33,
-        "lineTotal": 551165
-      },
-      {
-        "name": "نان ترتیلا بزرگ",
-        "quantity": 0.07,
-        "unit": "عدد",
-        "unitPrice": 250000,
-        "lineTotal": 17500
-      }
-    ],
-    "ingredientsCostTotal": 568665,
-    "referencePortionGrams": 44,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 10.5,
-      "carbGrams": 12.6,
-      "fatGrams": 10.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "065-حمص-کلاسیک",
-    "name": "حمص کلاسیک",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 16.5,
-      "protein": 14.0,
-      "veg": 15.7,
-      "fat": 53.8
-    },
-    "costPerServing": 2204660.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
+      "ایونت 9 مرداد ",
       "ایونت اکتوورکو  630"
     ],
     "ingredients": [
@@ -4969,7 +3552,69 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
+  },
+  {
+    "id": "064-حمص-و-ترتیلا",
+    "name": "حمص و ترتیلا",
+    "category": "پیش‌غذا",
+    "macro": {
+      "carb": 28.6,
+      "protein": 23.8,
+      "veg": 23.8,
+      "fat": 23.8
+    },
+    "costPerServing": 568665.0,
+    "costSource": "میانه 2 رویداد",
+    "priceVarianceFlag": false,
+    "needsPrice": false,
+    "eventsUsedIn": [
+      "ایونت ترنج 525",
+      "نوونوردیسک 526",
+      "ایونت 19 تیر"
+    ],
+    "ingredients": [
+      {
+        "name": "حمص",
+        "quantity": 42.25,
+        "unit": "گرم",
+        "unitPrice": 13045.33,
+        "lineTotal": 551165
+      },
+      {
+        "name": "نان ترتیلا بزرگ",
+        "quantity": 0.07,
+        "unit": "عدد",
+        "unitPrice": 250000,
+        "lineTotal": 17500
+      }
+    ],
+    "ingredientsCostTotal": 568665,
+    "referencePortionGrams": 44,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
+    "needsPortionEstimate": false,
+    "dietaryTags": [
+      "گیاهی",
+      "وگان"
+    ],
+    "dietaryTagsVerified": false,
+    "isBreakfastItem": false,
+    "wasteRisk": "فسادپذیر",
+    "wasteRiskVerified": false,
+    "observedCoveragePercent": null,
+    "observedEventsRecorded": 0,
+    "nutrition": {
+      "proteinGrams": 10.5,
+      "carbGrams": 12.6,
+      "fatGrams": 10.5,
+      "fiberGrams": null,
+      "calories": null
+    },
+    "needsNutritionReview": false,
+    "proteinSource": "plant-other",
+    "proteinSourceVerified": false,
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "066-خورش-خلال-کرمانشاهی",
@@ -5104,7 +3749,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "خورشتی/آرام‌پز",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "067-خورش-مسما-با-ماهیچه",
@@ -5217,7 +3862,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "خورشتی/آرام‌پز",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "068-خورش-مسما-بادنجان",
@@ -5330,7 +3975,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "خورشتی/آرام‌پز",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "069-دسر-تارت-لیمو-مرنگ-و-موز-فندق",
@@ -5371,8 +4016,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "070-دسر-و-میوه",
@@ -5414,7 +4059,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "071-دمنوش",
@@ -5455,50 +4100,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "072-دیتاکس",
-    "name": "دیتاکس",
-    "category": "نوشیدنی",
-    "macro": {
-      "carb": 75,
-      "protein": 5,
-      "veg": 5,
-      "fat": 15
-    },
-    "costPerServing": null,
-    "costSource": "بدون داده هزینه",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
-      "ایونت پاد "
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 250,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "قابل‌نگهداری",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 12.5,
-      "carbGrams": 187.5,
-      "fatGrams": 37.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "073-دیتاکس-واتر",
@@ -5521,7 +4124,8 @@
       "اوا تجارت -524",
       "نوونوردیسک 524",
       "ایونت ترنج 525",
-      "نوونوردیسک 526"
+      "نوونوردیسک 526",
+      "ایونت پاد "
     ],
     "ingredients": [
       {
@@ -5570,8 +4174,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "074-دیپ-آووکادو",
@@ -5631,8 +4235,8 @@
       }
     ],
     "ingredientsCostTotal": 1988430,
-    "referencePortionGrams": 132,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
+    "referencePortionGrams": 181.5,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
     "needsPortionEstimate": false,
     "dietaryTags": [
       "گیاهی"
@@ -5654,7 +4258,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "075-دیپ-زیتون",
@@ -5781,7 +4385,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "076-دیپ-پنیر",
@@ -5854,7 +4458,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "077-راویولی-اسفناج-و-پنیر",
@@ -5875,121 +4479,7 @@
       "ایونت 22 تیر ",
       "ایونت 31 تیر و 2 مرداد  ",
       "ایونت 5 مرداد ",
-      "نوونوردیسک 526"
-    ],
-    "ingredients": [
-      {
-        "name": "خمیر پاستا",
-        "quantity": 100,
-        "unit": "گرم",
-        "unitPrice": 2002.4,
-        "lineTotal": 200240.31
-      },
-      {
-        "name": "پنیر ریکوتا",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 10000,
-        "lineTotal": 200000
-      },
-      {
-        "name": "اسفناج",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 1000,
-        "lineTotal": 30000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "سس پستو",
-        "quantity": 25,
-        "unit": "گرم",
-        "unitPrice": 14934.05,
-        "lineTotal": 373351.19
-      },
-      {
-        "name": "خامه صورتی",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 9700,
-        "lineTotal": 194000
-      },
-      {
-        "name": "رزماری تازه",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 30000,
-        "lineTotal": 150000
-      },
-      {
-        "name": "مریم گلی تازه",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 60000,
-        "lineTotal": 300000
-      },
-      {
-        "name": "کره مهگل",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 5000,
-        "lineTotal": 75000
-      }
-    ],
-    "ingredientsCostTotal": 1527521.5,
-    "referencePortionGrams": 222,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 23.1,
-      "carbGrams": 117.9,
-      "fatGrams": 34.2,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "078-راویولی-اسفناج-و-پنیر-خامه-ای",
-    "name": "راویولی اسفناج و پنیر خامه ای",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 53.1,
-      "protein": 10.4,
-      "veg": 21.0,
-      "fat": 15.4
-    },
-    "costPerServing": 1527521.5,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
+      "نوونوردیسک 526",
       "ایونت 23تیر "
     ],
     "ingredients": [
@@ -6087,8 +4577,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "079-راویولی-قارچ",
@@ -6194,10 +4684,10 @@
       "calories": null
     },
     "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "proteinSource": "plant-other",
+    "proteinSourceVerified": true,
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "080-رپ-حمص",
@@ -6254,8 +4744,8 @@
       }
     ],
     "ingredientsCostTotal": 969566.27,
-    "referencePortionGrams": 160,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
+    "referencePortionGrams": 190,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
     "needsPortionEstimate": false,
     "dietaryTags": [
       "گیاهی",
@@ -6278,7 +4768,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "081-زیتون-پرورده",
@@ -6320,111 +4810,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "082-سالاد-سبزیجات-تابستانه",
-    "name": "سالاد سبزیجات تابستانه",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 6.0,
-      "protein": 6.0,
-      "veg": 82.1,
-      "fat": 6.0
-    },
-    "costPerServing": 1132487.1,
-    "costSource": "میانه 3 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت15 , 17 مرداد ",
-      "نوونوردیسک 524",
-      "نوونوردیسک 526"
-    ],
-    "ingredients": [
-      {
-        "name": "کیل",
-        "quantity": 40,
-        "unit": "گرم",
-        "unitPrice": 7500,
-        "lineTotal": 300000
-      },
-      {
-        "name": "سورل",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 3750,
-        "lineTotal": 75000
-      },
-      {
-        "name": "بی بی اسفناج",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 3500,
-        "lineTotal": 52500
-      },
-      {
-        "name": "کاهو فرانسوی",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 3500,
-        "lineTotal": 105000
-      },
-      {
-        "name": "توت فرنگی",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 5500,
-        "lineTotal": 275000
-      },
-      {
-        "name": "میکرو گرین",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 15000,
-        "lineTotal": 75000
-      },
-      {
-        "name": "بلوبری",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 21000,
-        "lineTotal": 105000
-      },
-      {
-        "name": "سس زرشک",
-        "quantity": 45,
-        "unit": "گرم",
-        "unitPrice": 3221.94,
-        "lineTotal": 144987.1
-      }
-    ],
-    "ingredientsCostTotal": 1132487.1,
-    "referencePortionGrams": 210,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 12.6,
-      "carbGrams": 12.6,
-      "fatGrams": 12.6,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "083-سالاد-سبزیجات-مدیترانه-ای",
@@ -6522,7 +4908,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "084-سالاد-سر-آشپز",
@@ -6609,114 +4995,11 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "085-سالاد-سه-قارچ",
-    "name": "سالاد سه قارچ",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 3.1,
-      "protein": 0.0,
-      "veg": 89.0,
-      "fat": 7.8
-    },
-    "costPerServing": 2395249.64,
-    "costSource": "میانه 2 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت15 , 17 مرداد ",
-      "نوونوردیسک 524"
-    ],
-    "ingredients": [
-      {
-        "name": "قارچ شی‌تاک",
-        "quantity": 40,
-        "unit": "گرم",
-        "unitPrice": 32000,
-        "lineTotal": 1280000
-      },
-      {
-        "name": "قارچ صدفی",
-        "quantity": 40,
-        "unit": "گرم",
-        "unitPrice": 7500,
-        "lineTotal": 300000
-      },
-      {
-        "name": "قارچ دکمه‌ای",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 1900,
-        "lineTotal": 57000
-      },
-      {
-        "name": "قارچ کرمینی",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 6000,
-        "lineTotal": 180000
-      },
-      {
-        "name": "روکولا",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 5000,
-        "lineTotal": 150000
-      },
-      {
-        "name": "کیل",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 7500,
-        "lineTotal": 225000
-      },
-      {
-        "name": "پیاز قرمز",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 480,
-        "lineTotal": 7200
-      },
-      {
-        "name": "درسینگ لیمو ترش",
-        "quantity": 40,
-        "unit": "سی سی",
-        "unitPrice": 4901.24,
-        "lineTotal": 196049.64
-      }
-    ],
-    "ingredientsCostTotal": 2395249.64,
-    "referencePortionGrams": 255,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 0.0,
-      "carbGrams": 7.9,
-      "fatGrams": 19.9,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "086-سالاد-سیب-زمینی",
-    "name": "سالاد سیب زمینی",
+    "id": "087-سالاد-سیب-زمینی-با-شوید",
+    "name": "سالاد سیب زمینی با شوید",
     "category": "پیش‌غذا",
     "macro": {
       "carb": 20,
@@ -6729,6 +5012,7 @@
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت11 تیر ",
       "ایونت 31 تیر و 2 مرداد  "
     ],
     "ingredients": [
@@ -6812,109 +5096,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "087-سالاد-سیب-زمینی-با-شوید",
-    "name": "سالاد سیب زمینی با شوید",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 20,
-      "protein": 15,
-      "veg": 55,
-      "fat": 10
-    },
-    "costPerServing": 403010.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت11 تیر "
-    ],
-    "ingredients": [
-      {
-        "name": "سیب زمینی",
-        "quantity": 150,
-        "unit": "گرم",
-        "unitPrice": 750,
-        "lineTotal": 112500
-      },
-      {
-        "name": "ماست یونانی",
-        "quantity": 25,
-        "unit": "گرم",
-        "unitPrice": 2100,
-        "lineTotal": 52500
-      },
-      {
-        "name": "سس مایونز",
-        "quantity": 25,
-        "unit": "گرم",
-        "unitPrice": 6500,
-        "lineTotal": 162500
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "آب لیمو",
-        "quantity": 5,
-        "unit": "سی سی",
-        "unitPrice": 4000,
-        "lineTotal": 20000
-      },
-      {
-        "name": "شوید",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 1000,
-        "lineTotal": 15000
-      },
-      {
-        "name": "سس خردل",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 7000,
-        "lineTotal": 35000
-      }
-    ],
-    "ingredientsCostTotal": 403010,
-    "referencePortionGrams": 228,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 34.2,
-      "carbGrams": 45.6,
-      "fatGrams": 22.8,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "088-سالاد-فتوش",
@@ -7051,12 +5234,12 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "089-سالاد-قارچ",
     "name": "سالاد قارچ",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 3.1,
       "protein": 0.0,
@@ -7069,7 +5252,9 @@
     "needsPrice": false,
     "eventsUsedIn": [
       "ایونت 9 مرداد ",
-      "ایونت اکتوورکو  630"
+      "ایونت اکتوورکو  630",
+      "ایونت15 , 17 مرداد ",
+      "نوونوردیسک 524"
     ],
     "ingredients": [
       {
@@ -7154,7 +5339,7 @@
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "090-سالاد-میوه-های-تابستانی-و-سس-زرشک",
@@ -7174,7 +5359,11 @@
       "ایونت11 تیر ",
       "ایونت 22 تیر ",
       "ایونت 23تیر ",
-      "ایونت 31 تیر و 2 مرداد  "
+      "ایونت 31 تیر و 2 مرداد  ",
+      "ایونت15 , 17 مرداد ",
+      "نوونوردیسک 524",
+      "نوونوردیسک 526",
+      "ایونت اکتوورکو  630"
     ],
     "ingredients": [
       {
@@ -7259,7 +5448,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "091-سالاد-پاستا",
@@ -7382,7 +5571,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "092-سالاد-کینوا",
@@ -7462,8 +5651,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "093-سالاد-یونانی",
@@ -7583,7 +5772,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "094-سبزی-پلو",
@@ -7653,12 +5842,12 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "095-سبزیجات-بخارپز",
-    "name": "سبزیجات بخارپز",
+    "id": "096-سبزیجات-گریل-سیب-زمینی-قارچ-و-کدو-و-هویج",
+    "name": "سبزیجات گریل (سیب زمینی ،قارچ و کدو و هویج)",
     "category": "غذای اصلی",
     "macro": {
       "carb": 23.3,
@@ -7667,10 +5856,11 @@
       "fat": 2.5
     },
     "costPerServing": 1108360.0,
-    "costSource": "میانه 5 رویداد",
+    "costSource": "تک رویداد",
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت 9 مرداد ",
       "ایونت11 تیر ",
       "ایونت 22 تیر ",
       "ایونت 23تیر ",
@@ -7780,131 +5970,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "آب‌پز/بخارپز",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "096-سبزیجات-گریل-سیب-زمینی-قارچ-و-کدو-و-هویج",
-    "name": "سبزیجات گریل (سیب زمینی ،قارچ و کدو و هویج)",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 23.3,
-      "protein": 0.1,
-      "veg": 74.0,
-      "fat": 2.5
-    },
-    "costPerServing": 1108360.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 9 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "هویج",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 750,
-        "lineTotal": 37500
-      },
-      {
-        "name": "سیب زمینی",
-        "quantity": 100,
-        "unit": "گرم",
-        "unitPrice": 750,
-        "lineTotal": 75000
-      },
-      {
-        "name": "مارچوبه",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 13000,
-        "lineTotal": 130000
-      },
-      {
-        "name": "کلم بروکلی",
-        "quantity": 80,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 200000
-      },
-      {
-        "name": "قارچ دکمه ای",
-        "quantity": 70,
-        "unit": "گرم",
-        "unitPrice": 1900,
-        "lineTotal": 133000
-      },
-      {
-        "name": "کدو سبز",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 660,
-        "lineTotal": 33000
-      },
-      {
-        "name": "گوجه گیلاسی",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 125000
-      },
-      {
-        "name": "جعفری",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 15000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 1160
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 8700
-      },
-      {
-        "name": "روغن زیتون حلب بدون بو",
-        "quantity": 10,
-        "unit": "سی سی",
-        "unitPrice": 35000,
-        "lineTotal": 350000
-      }
-    ],
-    "ingredientsCostTotal": 1108360,
-    "referencePortionGrams": 433,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 0.4,
-      "carbGrams": 100.9,
-      "fatGrams": 10.8,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "097-سوسیس-و-قارچ-و-سیب-زمینی",
@@ -7996,7 +6063,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "098-سوشی-دراگون-رول",
@@ -8115,8 +6182,8 @@
     "needsNutritionReview": false,
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "099-سوشی-ماکی-رول",
@@ -8228,8 +6295,8 @@
     "needsNutritionReview": false,
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "100-سوپ-گاسپاچو",
@@ -8351,13 +6418,13 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "آب‌پز/بخارپز",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "101-سینی-انگور-و-زیتون-و-دیپ-پنیر",
     "name": "سینی انگور و زیتون و دیپ پنیر",
-    "category": "دسر",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 55,
       "protein": 5,
@@ -8394,7 +6461,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "102-سینی-میوه-هندوانه-و-شاه-پسند",
@@ -8436,7 +6503,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "103-سینی-میوه-آناناس-و-توت-فرنگی-و-شلیل-و-زردآلو-و-بلوبری",
@@ -8509,13 +6576,13 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "104-سینی-پنیر-و-گردو-و-زیتون",
     "name": "سینی پنیر و گردو و زیتون",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 29.0,
       "protein": 29.7,
@@ -8582,68 +6649,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "105-شات-حمص-و-ترتیلا-وگن",
-    "name": "شات حمص و ترتیلا (وگن)",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 28.6,
-      "protein": 23.8,
-      "veg": 23.8,
-      "fat": 23.8
-    },
-    "costPerServing": 568665.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 19 تیر"
-    ],
-    "ingredients": [
-      {
-        "name": "حمص",
-        "quantity": 42.25,
-        "unit": "گرم",
-        "unitPrice": 13045.33,
-        "lineTotal": 551165
-      },
-      {
-        "name": "نان ترتیلا بزرگ",
-        "quantity": 0.07,
-        "unit": "عدد",
-        "unitPrice": 250000,
-        "lineTotal": 17500
-      }
-    ],
-    "ingredientsCostTotal": 568665,
-    "referencePortionGrams": 44,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی",
-      "وگان"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 10.5,
-      "carbGrams": 12.6,
-      "fatGrams": 10.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "106-شات-حمص-و-گوشت",
@@ -8666,7 +6673,7 @@
       {
         "name": "حمص",
         "quantity": 40,
-        "unit": "عدد",
+        "unit": "گرم",
         "unitPrice": 13045.33,
         "lineTotal": 521813.02
       },
@@ -8707,8 +6714,8 @@
       }
     ],
     "ingredientsCostTotal": 1075033.02,
-    "referencePortionGrams": 2023,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
+    "referencePortionGrams": 63,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
     "needsPortionEstimate": false,
     "dietaryTags": [],
     "dietaryTagsVerified": false,
@@ -8725,15 +6732,15 @@
       "calories": null
     },
     "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "proteinSource": "red-meat",
+    "proteinSourceVerified": true,
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "107-شات-دیپ-گورگونزلا",
     "name": "شات دیپ گورگونزلا",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 64.8,
       "protein": 20.2,
@@ -8814,8 +6821,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "108-شاه-میگو-گریل-با-سس-و-سبزیجات",
@@ -8914,7 +6921,7 @@
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "109-شیر",
@@ -8955,8 +6962,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "110-شیرینی",
@@ -8999,8 +7006,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "111-شیرینی-خشک",
@@ -9041,8 +7048,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "112-شیرینی-فرانسوی",
@@ -9060,48 +7067,7 @@
     "needsPrice": true,
     "eventsUsedIn": [
       "ایونت 19 تیر",
-      "ایونت 23تیر "
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 120,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 6.0,
-      "carbGrams": 66.0,
-      "fatGrams": 42.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "113-شیرینی-های-فرانسوی",
-    "name": "شیرینی های فرانسوی",
-    "category": "دسر",
-    "macro": {
-      "carb": 55,
-      "protein": 5,
-      "veg": 5,
-      "fat": 35
-    },
-    "costPerServing": null,
-    "costSource": "خرید از بیرون",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
+      "ایونت 23تیر ",
       "ایونت 31 تیر و 2 مرداد  "
     ],
     "ingredients": null,
@@ -9127,7 +7093,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "114-شیرینی-و-دسر-های-متنوع",
@@ -9168,8 +7134,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "115-شیرینی-پتی-فور",
@@ -9186,7 +7152,9 @@
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
-      "نوونوردیسک 524"
+      "نوونوردیسک 524",
+      "ایونت 18 مرداد ",
+      "ایونت ترنج 525"
     ],
     "ingredients": null,
     "ingredientsCostTotal": null,
@@ -9210,8 +7178,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "116-شیرینی-کوکی",
@@ -9253,7 +7221,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "117-صبحانه-ایرانی",
@@ -9294,8 +7262,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "118-صبحانه-سرد",
@@ -9375,8 +7343,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "119-ظرف-میوه-هندوانه-انبه-توت-فرنگی-گیلاس",
@@ -9417,8 +7385,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "120-فریزیه-توت-فرنگی",
@@ -9461,7 +7429,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "121-فیله-استریپس",
@@ -9560,8 +7528,8 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "122-فیله-مینیون-با-دمی-گلیز",
@@ -9699,10 +7667,10 @@
       "calories": null
     },
     "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
+    "proteinSource": "red-meat",
+    "proteinSourceVerified": true,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "123-قهوه",
@@ -9747,8 +7715,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "124-لازانیا-رولی",
@@ -9772,7 +7740,7 @@
       {
         "name": "لازانیا",
         "quantity": 1,
-        "unit": "گرم",
+        "unit": "عدد",
         "unitPrice": 2890,
         "lineTotal": 2890
       },
@@ -9834,9 +7802,9 @@
       }
     ],
     "ingredientsCostTotal": 1014267.45,
-    "referencePortionGrams": 350,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
+    "referencePortionGrams": 101,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
+    "needsPortionEstimate": false,
     "dietaryTags": [],
     "dietaryTagsVerified": false,
     "isBreakfastItem": false,
@@ -9855,7 +7823,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "125-لمب-لاین",
@@ -9897,7 +7865,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "126-لمب-لاین-با-سس-بورگاندی",
@@ -10017,7 +7985,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "127-ما-الشعیر",
@@ -10058,8 +8026,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "128-مارچوبه-وقارچ-و-سیب-بخارپز-و-بیکن",
@@ -10101,80 +8069,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "آب‌پز/بخارپز",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "129-ماست-اسفناج",
-    "name": "ماست اسفناج",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 10.2,
-      "protein": 15.0,
-      "veg": 49.7,
-      "fat": 25.0
-    },
-    "costPerServing": 319280.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 9 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 8700
-      },
-      {
-        "name": "اسفناج",
-        "quantity": 100,
-        "unit": "گرم",
-        "unitPrice": 1000,
-        "lineTotal": 100000
-      },
-      {
-        "name": "ماست یونانی",
-        "quantity": 100,
-        "unit": "گرم",
-        "unitPrice": 2100,
-        "lineTotal": 210000
-      }
-    ],
-    "ingredientsCostTotal": 319280,
-    "referencePortionGrams": 202,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 30.3,
-      "carbGrams": 20.6,
-      "fatGrams": 50.5,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "130-ماست-بورانی-بادنجان",
@@ -10246,12 +8141,12 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "131-ماست-خیار",
-    "name": "ماست خیار",
+    "id": "133-ماست-و-خیار",
+    "name": "ماست و خیار",
     "category": "پیش‌غذا",
     "macro": {
       "carb": 16.7,
@@ -10260,10 +8155,12 @@
       "fat": 31.7
     },
     "costPerServing": 166278.4,
-    "costSource": "تک رویداد",
+    "costSource": "میانه 2 رویداد",
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت 22 تیر ",
+      "ایونت 23تیر ",
       "ایونت فوتبال "
     ],
     "ingredients": [
@@ -10327,189 +8224,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "132-ماست-و-اسفناج",
-    "name": "ماست و اسفناج",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 6.0,
-      "protein": 6.0,
-      "veg": 82.1,
-      "fat": 6.0
-    },
-    "costPerServing": 1132487.1,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت اکتوورکو  630"
-    ],
-    "ingredients": [
-      {
-        "name": "کیل",
-        "quantity": 40,
-        "unit": "گرم",
-        "unitPrice": 7500,
-        "lineTotal": 300000
-      },
-      {
-        "name": "سورل",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 3750,
-        "lineTotal": 75000
-      },
-      {
-        "name": "بی بی اسفناج",
-        "quantity": 15,
-        "unit": "گرم",
-        "unitPrice": 3500,
-        "lineTotal": 52500
-      },
-      {
-        "name": "کاهو فرانسوی",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 3500,
-        "lineTotal": 105000
-      },
-      {
-        "name": "توت فرنگی",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 5500,
-        "lineTotal": 275000
-      },
-      {
-        "name": "میکرو گرین",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 15000,
-        "lineTotal": 75000
-      },
-      {
-        "name": "بلوبری",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 21000,
-        "lineTotal": 105000
-      },
-      {
-        "name": "سس زرشک",
-        "quantity": 45,
-        "unit": "گرم",
-        "unitPrice": 3221.94,
-        "lineTotal": 144987.1
-      }
-    ],
-    "ingredientsCostTotal": 1132487.1,
-    "referencePortionGrams": 210,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 12.6,
-      "carbGrams": 12.6,
-      "fatGrams": 12.6,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "133-ماست-و-خیار",
-    "name": "ماست و خیار",
-    "category": "پیش‌غذا",
-    "macro": {
-      "carb": 16.7,
-      "protein": 26.7,
-      "veg": 25.0,
-      "fat": 31.7
-    },
-    "costPerServing": 166278.4,
-    "costSource": "میانه 2 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 22 تیر ",
-      "ایونت 23تیر "
-    ],
-    "ingredients": [
-      {
-        "name": "ماست چکیده کاله",
-        "quantity": 80,
-        "unit": "گرم",
-        "unitPrice": 0,
-        "lineTotal": 0
-      },
-      {
-        "name": "خیار",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 700,
-        "lineTotal": 21000
-      },
-      {
-        "name": "گردو ایرانی درجه یک",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 14500,
-        "lineTotal": 145000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 0.03,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 17.4
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.03,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 261
-      }
-    ],
-    "ingredientsCostTotal": 166278.4,
-    "referencePortionGrams": 120,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 32.0,
-      "carbGrams": 20.0,
-      "fatGrams": 38.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "134-مافین-بیکن-و-موزارلا",
@@ -10587,13 +8302,13 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "135-مافین-سبزیجات",
     "name": "مافین سبزیجات",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 9.5,
       "protein": 45.8,
@@ -10692,112 +8407,12 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
-    "id": "136-ماهی",
-    "name": "ماهی",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 2.5,
-      "protein": 63.9,
-      "veg": 26.5,
-      "fat": 7.1
-    },
-    "costPerServing": 3769930.0,
-    "costSource": "میانه 2 رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 31 تیر و 2 مرداد  ",
-      "ایونت 5 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "ماهی دم سبز",
-        "quantity": 200,
-        "unit": "گرم",
-        "unitPrice": 15000,
-        "lineTotal": 3000000
-      },
-      {
-        "name": "آب لیمو",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 4000,
-        "lineTotal": 60000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "جعفری",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 15000
-      },
-      {
-        "name": "سرکه سیب",
-        "quantity": 10,
-        "unit": "سی سی",
-        "unitPrice": 2500,
-        "lineTotal": 25000
-      },
-      {
-        "name": "لیمو ترش",
-        "quantity": 70,
-        "unit": "گرم",
-        "unitPrice": 2000,
-        "lineTotal": 140000
-      },
-      {
-        "name": "روغن زیتون حلب بدون بو",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 35000,
-        "lineTotal": 525000
-      }
-    ],
-    "ingredientsCostTotal": 3769930,
-    "referencePortionGrams": 322,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 205.8,
-      "carbGrams": 8.1,
-      "fatGrams": 22.9,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "137-ماهی-جیش-سفید",
-    "name": "ماهی جیش سفید",
+    "id": "138-ماهی-سکن-گریل",
+    "name": "ماهی سکن گریل",
     "category": "غذای اصلی",
     "macro": {
       "carb": 2.5,
@@ -10810,6 +8425,9 @@
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
+      "ایونت11 تیر ",
+      "ایونت 31 تیر و 2 مرداد  ",
+      "ایونت 5 مرداد ",
       "ایونت 23تیر "
     ],
     "ingredients": [
@@ -10892,106 +8510,7 @@
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "138-ماهی-سکن-گریل",
-    "name": "ماهی سکن گریل",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 2.5,
-      "protein": 63.9,
-      "veg": 26.5,
-      "fat": 7.1
-    },
-    "costPerServing": 3769930.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت11 تیر "
-    ],
-    "ingredients": [
-      {
-        "name": "ماهی دم سبز",
-        "quantity": 200,
-        "unit": "گرم",
-        "unitPrice": 15000,
-        "lineTotal": 3000000
-      },
-      {
-        "name": "آب لیمو",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 4000,
-        "lineTotal": 60000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "جعفری",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 1500,
-        "lineTotal": 15000
-      },
-      {
-        "name": "سرکه سیب",
-        "quantity": 10,
-        "unit": "سی سی",
-        "unitPrice": 2500,
-        "lineTotal": 25000
-      },
-      {
-        "name": "لیمو ترش",
-        "quantity": 70,
-        "unit": "گرم",
-        "unitPrice": 2000,
-        "lineTotal": 140000
-      },
-      {
-        "name": "روغن زیتون حلب بدون بو",
-        "quantity": 15,
-        "unit": "سی سی",
-        "unitPrice": 35000,
-        "lineTotal": 525000
-      }
-    ],
-    "ingredientsCostTotal": 3769930,
-    "referencePortionGrams": 322,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 205.8,
-      "carbGrams": 8.1,
-      "fatGrams": 22.9,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "139-ماکتل-های-متنوع",
@@ -11032,8 +8551,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "140-مرغ-توسکانی",
@@ -11052,7 +8571,8 @@
     "eventsUsedIn": [
       "ایونت 9 مرداد ",
       "نوونوردیسک 526",
-      "ایونت اکتوورکو  630"
+      "ایونت اکتوورکو  630",
+      "ایونت 23تیر "
     ],
     "ingredients": [
       {
@@ -11148,7 +8668,7 @@
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "141-مرغ-شکم-پر",
@@ -11267,8 +8787,8 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "142-میتبال-بوقلمون",
@@ -11373,8 +8893,8 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "143-مینی-برگر",
@@ -11391,7 +8911,8 @@
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
-      "ایونت پاد "
+      "ایونت پاد ",
+      "ایونت فوتبال "
     ],
     "ingredients": [
       {
@@ -11500,140 +9021,13 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "144-مینی-برگر-و-سیب-زمینی-سرخ-شده",
-    "name": "مینی برگر و سیب زمینی سرخ شده",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 21.4,
-      "protein": 39.3,
-      "veg": 35.4,
-      "fat": 3.9
-    },
-    "costPerServing": 1260930.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت فوتبال "
-    ],
-    "ingredients": [
-      {
-        "name": "نان برگر اسلایدر",
-        "quantity": 1,
-        "unit": "عدد",
-        "unitPrice": 400,
-        "lineTotal": 400
-      },
-      {
-        "name": "کاهو فرانسوی",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 3500,
-        "lineTotal": 70000
-      },
-      {
-        "name": "گوجه فرنگی",
-        "quantity": 25,
-        "unit": "گرم",
-        "unitPrice": 890,
-        "lineTotal": 22250
-      },
-      {
-        "name": "توپز گوساله",
-        "quantity": 60,
-        "unit": "گرم",
-        "unitPrice": 17500,
-        "lineTotal": 1050000
-      },
-      {
-        "name": "پیاز",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 480,
-        "lineTotal": 4800
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 8700
-      },
-      {
-        "name": "ادویه اسموکی",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 15500,
-        "lineTotal": 7750
-      },
-      {
-        "name": "خامه صورتی",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 9700,
-        "lineTotal": 48500
-      },
-      {
-        "name": "تخم گشنیز",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 7500,
-        "lineTotal": 3750
-      },
-      {
-        "name": "سس مایونز",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 6500,
-        "lineTotal": 32500
-      },
-      {
-        "name": "سس کچاپ",
-        "quantity": 5,
-        "unit": "گرم",
-        "unitPrice": 2340,
-        "lineTotal": 11700
-      }
-    ],
-    "ingredientsCostTotal": 1260930,
-    "referencePortionGrams": 163,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 64.1,
-      "carbGrams": 34.9,
-      "fatGrams": 6.4,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "red-meat",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرخ‌کردنی",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "145-مینی-پیده",
     "name": "مینی پیده",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 47.4,
       "protein": 23.9,
@@ -11741,50 +9135,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "146-میوه",
-    "name": "میوه",
-    "category": "دسر",
-    "macro": {
-      "carb": 55,
-      "protein": 5,
-      "veg": 5,
-      "fat": 35
-    },
-    "costPerServing": null,
-    "costSource": "بدون داده هزینه",
-    "priceVarianceFlag": false,
-    "needsPrice": true,
-    "eventsUsedIn": [
-      "ایونت اکتوورکو  630"
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 120,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 6.0,
-      "carbGrams": 66.0,
-      "fatGrams": 42.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "147-میگو-سوخاری",
@@ -11804,112 +9156,7 @@
       "ایونت11 تیر ",
       "ایونت 19 تیر",
       "ایونت 31 تیر و 2 مرداد  ",
-      "ایونت اکتوورکو  630"
-    ],
-    "ingredients": [
-      {
-        "name": "میگو 16/20 با دم",
-        "quantity": 50,
-        "unit": "گرم",
-        "unitPrice": 35000,
-        "lineTotal": 1750000
-      },
-      {
-        "name": "آرد پانکو",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 4500,
-        "lineTotal": 45000
-      },
-      {
-        "name": "آرد سفید آردینه",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 1200,
-        "lineTotal": 2400
-      },
-      {
-        "name": "تخم مرغ",
-        "quantity": 0.2,
-        "unit": "عدد",
-        "unitPrice": 140000,
-        "lineTotal": 28000
-      },
-      {
-        "name": "سیر",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 2500
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 580
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      },
-      {
-        "name": "لیمو ترش",
-        "quantity": 10,
-        "unit": "گرم",
-        "unitPrice": 2000,
-        "lineTotal": 20000
-      },
-      {
-        "name": "روغن سرخ کردنی",
-        "quantity": 2,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 10000
-      }
-    ],
-    "ingredientsCostTotal": 1862830,
-    "referencePortionGrams": 86,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 59.9,
-      "carbGrams": 12.4,
-      "fatGrams": 2.4,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "fish-shrimp",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرخ‌کردنی",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "148-میگو-سوخاری-در-شات",
-    "name": "میگو سوخاری در شات",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 14.4,
-      "protein": 69.7,
-      "veg": 13.1,
-      "fat": 2.8
-    },
-    "costPerServing": 1862830.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
+      "ایونت اکتوورکو  630",
       "ایونت 9 مرداد "
     ],
     "ingredients": [
@@ -11999,7 +9246,7 @@
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرخ‌کردنی",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "149-نوشابه",
@@ -12040,8 +9287,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "150-نوشیدنی-های-سرد-و-گرم",
@@ -12082,8 +9329,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "151-نیمرو-اسفناج",
@@ -12124,8 +9371,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "152-هندوانه",
@@ -12167,7 +9414,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "153-پاپ-کورن",
@@ -12209,51 +9456,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "154-پتی-فور",
-    "name": "پتی فور",
-    "category": "دسر",
-    "macro": {
-      "carb": 55,
-      "protein": 5,
-      "veg": 5,
-      "fat": 35
-    },
-    "costPerServing": 21600000.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
-      "ایونت 18 مرداد ",
-      "ایونت ترنج 525"
-    ],
-    "ingredients": null,
-    "ingredientsCostTotal": null,
-    "referencePortionGrams": 120,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 6.0,
-      "carbGrams": 66.0,
-      "fatGrams": 42.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": true,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "155-پلو-اسپانیایی",
@@ -12362,8 +9566,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "156-پلو-میگو",
@@ -12380,7 +9584,8 @@
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
-      "نوونوردیسک 524"
+      "نوونوردیسک 524",
+      "ایونت15 , 17 مرداد "
     ],
     "ingredients": [
       {
@@ -12490,7 +9695,7 @@
     "proteinSource": "fish-shrimp",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "157-پنکیک-با-سیروپ-افرا-و-میوه",
@@ -12604,8 +9809,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "158-پنیر-و-میوه-و-آجیل-به-همراه-عرقیجات-ویژه-ریبون",
@@ -12699,7 +9904,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "159-پوچداگ",
@@ -12717,98 +9922,7 @@
     "needsPrice": false,
     "eventsUsedIn": [
       "ایونت 23تیر ",
-      "ایونت 5 مرداد "
-    ],
-    "ingredients": [
-      {
-        "name": "تخم مرغ",
-        "quantity": 1,
-        "unit": "عدد",
-        "unitPrice": 140000,
-        "lineTotal": 140000
-      },
-      {
-        "name": "بیکن بوقلمون 97%",
-        "quantity": 30,
-        "unit": "گرم",
-        "unitPrice": 26000,
-        "lineTotal": 780000
-      },
-      {
-        "name": "سرکه سفید",
-        "quantity": 10,
-        "unit": "سی سی",
-        "unitPrice": 880,
-        "lineTotal": 8800
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 290
-      },
-      {
-        "name": "روغن سرخ کردنی",
-        "quantity": 1,
-        "unit": "سی سی",
-        "unitPrice": 5000,
-        "lineTotal": 5000
-      },
-      {
-        "name": "کره مهگل",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 5000,
-        "lineTotal": 10000
-      },
-      {
-        "name": "میکروگرین",
-        "quantity": 1,
-        "unit": "گرم",
-        "unitPrice": 15000,
-        "lineTotal": 15000
-      }
-    ],
-    "ingredientsCostTotal": 959090,
-    "referencePortionGrams": 350,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
-    "dietaryTags": [],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 122.5,
-      "carbGrams": 105.0,
-      "fatGrams": 70.0,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "red-meat",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "160-پوچداگ-با-سس",
-    "name": "پوچداگ با سس",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 30,
-      "protein": 35,
-      "veg": 15,
-      "fat": 20
-    },
-    "costPerServing": 959090.0,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
+      "ایونت 5 مرداد ",
       "ایونت 22 تیر "
     ],
     "ingredients": [
@@ -12863,12 +9977,12 @@
       }
     ],
     "ingredientsCostTotal": 959090,
-    "referencePortionGrams": 350,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
+    "referencePortionGrams": 94.5,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
+    "needsPortionEstimate": false,
     "dietaryTags": [],
     "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
+    "isBreakfastItem": true,
     "wasteRisk": "فسادپذیر",
     "wasteRiskVerified": false,
     "observedCoveragePercent": null,
@@ -12881,10 +9995,10 @@
       "calories": null
     },
     "needsNutritionReview": false,
-    "proteinSource": "red-meat",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "proteinSource": "plant-other",
+    "proteinSourceVerified": true,
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "161-پیتزا-بیکن",
@@ -12969,7 +10083,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "162-پیتزا-مارگاریتا",
@@ -13056,7 +10170,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "163-پیتزا-پپرونی",
@@ -13134,7 +10248,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "164-چاپسویی-با-گوشت",
@@ -13295,8 +10409,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "165-چای",
@@ -13342,8 +10456,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "166-چای-و-انواع-قهوه",
@@ -13384,8 +10498,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "167-چای-و-دمنوش",
@@ -13426,8 +10540,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "168-چای-و-قهوه",
@@ -13471,13 +10585,13 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "آب‌پز/بخارپز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "169-چند-مدل-آبمیوه-طبیعی",
     "name": "چند مدل آبمیوه طبیعی",
-    "category": "دسر",
+    "category": "نوشیدنی",
     "macro": {
       "carb": 55,
       "protein": 5,
@@ -13514,7 +10628,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "170-چند-نوع-اسموتی",
@@ -13555,8 +10669,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": null,
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرد/بدون پخت",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "171-چیپس-ترتیلا-با-سس",
@@ -13573,7 +10687,8 @@
     "priceVarianceFlag": false,
     "needsPrice": false,
     "eventsUsedIn": [
-      "ایونت پاد "
+      "ایونت پاد ",
+      "ایونت فوتبال "
     ],
     "ingredients": [
       {
@@ -13606,8 +10721,8 @@
       }
     ],
     "ingredientsCostTotal": 1031208.38,
-    "referencePortionGrams": 148,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
+    "referencePortionGrams": 193,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
     "needsPortionEstimate": false,
     "dietaryTags": [
       "گیاهی",
@@ -13629,8 +10744,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "172-چیپس-دست-ساز",
@@ -13671,8 +10786,8 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "173-چیکن-استراگانف",
@@ -13805,8 +10920,8 @@
     "needsNutritionReview": false,
     "proteinSource": "white-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "خورشتی/آرام‌پز",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "174-کباب-قفقازی",
@@ -13892,7 +11007,7 @@
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "کبابی",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "175-کروسان",
@@ -13933,13 +11048,13 @@
     "needsNutritionReview": true,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "176-کروسان-پنیر-و-گردو",
     "name": "کروسان پنیر و گردو",
-    "category": "غذای اصلی",
+    "category": "پیش‌غذا",
     "macro": {
       "carb": 49.5,
       "protein": 15.8,
@@ -14006,8 +11121,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "177-کروستینی-پنیر-و-پستو",
@@ -14025,100 +11140,7 @@
     "needsPrice": false,
     "eventsUsedIn": [
       "ایونت 18 مرداد ",
-      "ایونت ترنج 525"
-    ],
-    "ingredients": [
-      {
-        "name": "نان باگت جو",
-        "quantity": 0.1,
-        "unit": "عدد",
-        "unitPrice": 130000,
-        "lineTotal": 13000
-      },
-      {
-        "name": "پنیر خامه ای ویلی",
-        "quantity": 40,
-        "unit": "گرم",
-        "unitPrice": 6250,
-        "lineTotal": 250000
-      },
-      {
-        "name": "ریحان ایتالیایی",
-        "quantity": 2,
-        "unit": "گرم",
-        "unitPrice": 3800,
-        "lineTotal": 7600
-      },
-      {
-        "name": "سس پستو",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 14934.05,
-        "lineTotal": 298680.95
-      },
-      {
-        "name": "گوجه گیلاسی قرمز",
-        "quantity": 20,
-        "unit": "گرم",
-        "unitPrice": 2500,
-        "lineTotal": 50000
-      },
-      {
-        "name": "نمک تصفیه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 580,
-        "lineTotal": 290
-      },
-      {
-        "name": "فلفل سیاه",
-        "quantity": 0.5,
-        "unit": "گرم",
-        "unitPrice": 8700,
-        "lineTotal": 4350
-      }
-    ],
-    "ingredientsCostTotal": 623920.95,
-    "referencePortionGrams": 86,
-    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه)",
-    "needsPortionEstimate": false,
-    "dietaryTags": [
-      "گیاهی"
-    ],
-    "dietaryTagsVerified": false,
-    "isBreakfastItem": false,
-    "wasteRisk": "فسادپذیر",
-    "wasteRiskVerified": false,
-    "observedCoveragePercent": null,
-    "observedEventsRecorded": 0,
-    "nutrition": {
-      "proteinGrams": 17.2,
-      "carbGrams": 16.3,
-      "fatGrams": 25.3,
-      "fiberGrams": null,
-      "calories": null
-    },
-    "needsNutritionReview": false,
-    "proteinSource": "plant-other",
-    "proteinSourceVerified": false,
-    "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
-  },
-  {
-    "id": "178-کروستینی-پنیر-و-گوجه-وگن",
-    "name": "کروستینی پنیر و گوجه (وگن)",
-    "category": "غذای اصلی",
-    "macro": {
-      "carb": 19.0,
-      "protein": 20.0,
-      "veg": 31.6,
-      "fat": 29.4
-    },
-    "costPerServing": 623920.95,
-    "costSource": "تک رویداد",
-    "priceVarianceFlag": false,
-    "needsPrice": false,
-    "eventsUsedIn": [
+      "ایونت ترنج 525",
       "ایونت 19 تیر"
     ],
     "ingredients": [
@@ -14195,8 +11217,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "فر",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "179-کشک-بادنجان",
@@ -14317,8 +11339,8 @@
     "needsNutritionReview": false,
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "گریل",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "سرخ‌کردنی",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "180-کلاب-کالیفرنیا",
@@ -14376,9 +11398,9 @@
       }
     ],
     "ingredientsCostTotal": 2361000,
-    "referencePortionGrams": 350,
-    "portionSource": "پیش‌فرض دسته (بدون کارت رسپی قابل‌اتکا)",
-    "needsPortionEstimate": true,
+    "referencePortionGrams": 114.5,
+    "portionSource": "برآورد از کارت رسپی (مجموع وزن مواد اولیه) — بازبینی‌شده",
+    "needsPortionEstimate": false,
     "dietaryTags": [],
     "dietaryTagsVerified": false,
     "isBreakfastItem": false,
@@ -14396,8 +11418,8 @@
     "needsNutritionReview": false,
     "proteinSource": "red-meat",
     "proteinSourceVerified": false,
-    "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethod": "گریل",
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "181-کوکتل-میوه",
@@ -14423,7 +11445,8 @@
       "ایونت 18 مرداد ",
       "نوونوردیسک 524",
       "ایونت ترنج 525",
-      "نوونوردیسک 526"
+      "نوونوردیسک 526",
+      "ایونت اکتوورکو  630"
     ],
     "ingredients": [
       {
@@ -14487,7 +11510,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "سرد/بدون پخت",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "182-کوکی",
@@ -14529,7 +11552,7 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   },
   {
     "id": "183-کیک-صبحانه",
@@ -14571,6 +11594,6 @@
     "proteinSource": "plant-other",
     "proteinSourceVerified": false,
     "defaultCookingMethod": "فر",
-    "defaultCookingMethodVerified": false
+    "defaultCookingMethodVerified": true
   }
 ]
