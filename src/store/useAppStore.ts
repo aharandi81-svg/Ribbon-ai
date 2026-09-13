@@ -44,6 +44,16 @@ interface AppState {
   /** تعریف یک ماده اولیه‌ی کاملاً جدید (نامی که قبلاً در هیچ غذا یا فهرست دستی‌ای نبوده). قیمت
    * اولیه (اگر داده شود) بلافاصله به‌عنوان اولین رکورد ingredientPriceLog همان نام ثبت می‌شود. */
   addCustomIngredient: (name: string, def: CustomIngredientDef, initialPrice: number | null) => void
+  /** جایگزینی کامل وضعیت برنامه با یک عکس‌فوری بارگذاری‌شده از فایل دیتابیس روی دیسک (نگاه کنید
+   * به src/lib/fileStorage.ts و FileDatabaseBar) — از همان reconcile*های استفاده‌شده در merge()ی
+   * persist رد می‌شود تا اگر فایل قدیمی/ناقص بود، ساختار نهایی هنوز معتبر بماند. */
+  loadSnapshot: (snapshot: {
+    dishes?: Dish[]
+    plan?: Partial<EventPlan>
+    settings?: Partial<AppSettings>
+    ingredientPriceLog?: Record<string, IngredientPriceLogEntry[]>
+    customIngredients?: CustomIngredients
+  }) => void
 
   setPlanField: <K extends keyof EventPlan>(key: K, value: EventPlan[K]) => void
   setCategoryBudgetShare: (category: Category, value: number) => void
@@ -201,6 +211,15 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ customIngredients: { ...state.customIngredients, [name]: def } }))
         if (initialPrice != null && initialPrice > 0) get().setIngredientPrice(name, initialPrice)
       },
+
+      loadSnapshot: (snapshot) =>
+        set(() => ({
+          dishes: reconcileDishes(snapshot.dishes),
+          settings: reconcileSettings(snapshot.settings),
+          plan: reconcilePlan(snapshot.plan),
+          ingredientPriceLog: snapshot.ingredientPriceLog ?? {},
+          customIngredients: snapshot.customIngredients ?? {},
+        })),
 
       setPlanField: (key, value) =>
         set((state) => ({ plan: { ...state.plan, [key]: value } })),

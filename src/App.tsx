@@ -5,6 +5,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { RecommendationsPage } from './pages/RecommendationsPage'
 import { DishDatabasePage } from './pages/DishDatabasePage'
 import { IngredientsPage } from './pages/IngredientsPage'
+import { FileDatabaseBar } from './components/FileDatabaseBar'
 
 const TABS = [
   { id: 'settings', label: 'تنظیمات رویداد', Component: EventSettingsPage },
@@ -70,6 +71,9 @@ function App() {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+        </div>
+        <div className="flex justify-end px-4 pb-3 sm:px-6 lg:px-8">
+          <FileDatabaseBar />
         </div>
         <div className="h-1 w-full bg-amber-400" />
       </header>
