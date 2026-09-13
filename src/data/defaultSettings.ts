@@ -13,6 +13,10 @@ export const defaultMenuOptimizerSettings: MenuOptimizerSettings = {
     'white-meat': 25,
     'fish-shrimp': 10,
   },
+  // ۳۰ واحد درصد پیش‌فرض: به‌قدر کافی سخت‌گیرانه که واقعاً اعمال شود (مثلاً سهم گوشت قرمز صفر
+  // دیگر هرگز رد نمی‌شود)، ولی نه آن‌قدر تنگ که با تعداد قلم محدود هر دسته (تقسیم درصدی ذاتاً
+  // درشت‌دانه) یا داده‌ی ناقص برخی غذاهای گران‌قیمت، هیچ ترکیبی پیدا نشود.
+  proteinSourceDistributionTolerancePercent: 30,
   targetMenuProfiles: {
     A: { id: 'A', label: 'پروفایل A (پروتئین‌محور متعادل)', proteinSharePercent: 40, fatSharePercent: 30, carbSharePercent: 30 },
     B: { id: 'B', label: 'پروفایل B (پروتئین‌محور بالا)', proteinSharePercent: 50, fatSharePercent: 25, carbSharePercent: 25 },

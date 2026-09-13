@@ -242,7 +242,11 @@ export function OptimizerSettingsModal({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="mt-5">
-        <h4 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">توزیع هدف منابع پروتئین (٪) — مبنای امتیاز تنوع پروتئین</h4>
+        <h4 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">توزیع هدف منابع پروتئین (٪) — Hard Constraint</h4>
+        <p className="mb-2 text-xs text-slate-400 dark:text-slate-500">
+          سهم واقعی هر منبع بر مبنای گرم واقعی پروتئین کارت رسپی/دیتابیس غذا (نه تعداد قلم) محاسبه و اجباراً اعمال می‌شود — هر ترکیبی که بیش از «تحمل مجاز»
+          زیر از این هدف فاصله بگیرد، از پیشنهادهای تولیدشده کاملاً حذف می‌شود.
+        </p>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {PROTEIN_SOURCE_DISTRIBUTION_KEYS.map((key) => (
             <Field key={key} label={PROTEIN_SOURCE_LABELS[key]}>
@@ -259,6 +263,16 @@ export function OptimizerSettingsModal({ onClose }: { onClose: () => void }) {
           </Field>
         </div>
         {proteinDistSum > 100 && <p className="mt-1 text-xs text-red-600 dark:text-red-400">جمع سه سهم بالا از ۱۰۰٪ عبور کرده — سهم گیاهی/سایر منفی می‌شود.</p>}
+        <div className="mt-3 max-w-xs">
+          <Field label="تحمل مجاز انحراف از هدف (واحد درصد)" hint="مثلاً ۲۰ یعنی سهم واقعی هر منبع می‌تواند تا ۲۰ واحد درصد از هدف بالا فاصله داشته باشد؛ عبور از آن ترکیب را کاملاً رد می‌کند">
+            <NumberInput
+              value={opt.proteinSourceDistributionTolerancePercent}
+              min={0}
+              max={100}
+              onChange={(v) => setMenuOptimizerSettings({ proteinSourceDistributionTolerancePercent: v })}
+            />
+          </Field>
+        </div>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">

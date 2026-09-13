@@ -27,7 +27,10 @@ const settings: AppSettings = {
     'فر': 5,
     'سرد/بدون پخت': 8,
   },
-  menuOptimizer: defaultMenuOptimizerSettings,
+  // این تست‌ها اغلب دیش‌های ساختگی با proteinSource پیش‌فرض makeDish (همه plant-other) می‌سازند
+  // که ربطی به تست ۱۶ (Hard Constraint سهم منابع پروتئین) ندارد — تحمل ۱۰۰ یعنی این محدودیت
+  // تازه برای بقیه‌ی تست‌ها عملاً بی‌اثر می‌ماند؛ تست ۱۶ خودش یک تنظیمات جداگانه با تحمل واقعی می‌سازد.
+  menuOptimizer: { ...defaultMenuOptimizerSettings, proteinSourceDistributionTolerancePercent: 100 },
 }
 
 function makeDish(overrides: Partial<Dish> & { id: string }): Dish {
@@ -233,6 +236,10 @@ describe('8. budget overrun behavior — exclude vs penalize', () => {
     ...defaultMenuOptimizerSettings,
     minDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
     maxDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+    // این تست درباره‌ی رفتار عبور از بودجه است، نه سهم منابع پروتئین — همه‌ی دیش‌های ساختگی
+    // اینجا proteinSource پیش‌فرض makeDish (plant-other) را دارند، پس Hard Constraint سهم
+    // پروتئین باید اینجا بی‌اثر بماند.
+    proteinSourceDistributionTolerancePercent: 100,
   }
   const plan = makePlan({ guestCount, perPersonBudget: 100_000, dishConstraints: { 'expensive-main': 'must-include' } })
 
@@ -543,5 +550,98 @@ describe('15. cross-proposal variety — different strategies must be able to pi
     // اگر Beam زودتر از موعد فقط یک گزینه‌ی «پیش‌غذا» را زنده نگه دارد، این دو همیشه برابر
     // می‌شوند — دقیقاً باگی که این تست باید از بازگشتش جلوگیری کند.
     expect(costPick).not.toBe(nutritionPick)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 16) Hard Constraint: سهم منابع پروتئین (گوشت قرمز/سفید/ماهی‌میگو) دیگر صرفاً یک امتیاز نرم
+//     نیست — طبق درخواست کاربر («سهم گوشت و مرغ و ماهی را حتماً اعمال کن»)، هر ترکیبی که بیش از
+//     تحمل مجاز از هدف تنظیمات فاصله بگیرد باید کاملاً رد شود، حتی اگر از هر نظر دیگری
+//     (هزینه/Dish Score) گزینه‌ی برتر باشد.
+// ---------------------------------------------------------------------------
+describe('16. hard constraint — protein source distribution must actually be enforced', () => {
+  it('rejects a combo whose main course is a source far outside the tolerance, even when it is otherwise the best option', () => {
+    // هدف: ۱۰۰٪ گوشت قرمز (تحمل ۱۰ واحد درصد) — یعنی فقط main-red واقعاً مجاز است.
+    // main-plant عمداً ارزان‌تر و امتیاز کلی‌اش بالاتر ساخته شده تا بدون این Hard Constraint
+    // همیشه همان انتخاب می‌شد؛ اگر این تست pass شود یعنی محدودیت واقعاً «حتماً اعمال» می‌شود.
+    // main-red باید سهم غالب پروتئین «سفره» (غذای اصلی/پیش‌غذا/دسر، بدون نوشیدنی) را تشکیل دهد
+    // تا رسیدن به هدف ۱۰۰٪ گوشت قرمز واقعاً ممکن باشد — پس پیش‌غذا/دسر عمداً کم‌پروتئین‌اند.
+    const mainRedMeat = makeDish({
+      id: 'main-red',
+      category: 'غذای اصلی',
+      proteinSource: 'red-meat',
+      costPerServing: 400_000,
+      nutrition: { proteinGrams: 200, carbGrams: 10, fatGrams: 10, fiberGrams: null, calories: null },
+    })
+    const mainPlantOther = makeDish({
+      id: 'main-plant',
+      category: 'غذای اصلی',
+      proteinSource: 'plant-other',
+      costPerServing: 100_000,
+      nutrition: { proteinGrams: 200, carbGrams: 10, fatGrams: 10, fiberGrams: null, calories: null },
+    })
+    const lowProteinSide = (id: string, category: 'پیش‌غذا' | 'دسر' | 'نوشیدنی') =>
+      makeDish({ id, category, proteinSource: 'plant-other', costPerServing: 20_000, nutrition: { proteinGrams: 5, carbGrams: 10, fatGrams: 2, fiberGrams: null, calories: null } })
+    const others = [lowProteinSide('app', 'پیش‌غذا'), lowProteinSide('dessert', 'دسر'), lowProteinSide('drink', 'نوشیدنی')]
+    const plan = makePlan({ guestCount: 20, perPersonBudget: 2_000_000 })
+    const localSettings: AppSettings = {
+      ...settings,
+      menuOptimizer: {
+        ...defaultMenuOptimizerSettings,
+        proteinSourceDistributionTarget: { 'red-meat': 100, 'white-meat': 0, 'fish-shrimp': 0 },
+        proteinSourceDistributionTolerancePercent: 10,
+        minDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+        maxDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+      },
+    }
+    const { proposals } = generateMenuProposals([mainRedMeat, mainPlantOther, ...others], plan, localSettings)
+
+    expect(proposals.length).toBeGreaterThan(0)
+    for (const p of proposals) {
+      expect(p.dishes.some((d) => d.dishId === 'main-plant')).toBe(false)
+      expect(p.dishes.some((d) => d.dishId === 'main-red')).toBe(true)
+    }
+  })
+
+  it('drinks and desserts never count toward the protein-source share — only PLATE_CATEGORIES do', () => {
+    // یک نوشیدنی با پروتئین بالا و منبع متفاوت (fish-shrimp، فرضی) نباید بتواند سهم منابع
+    // پروتئین محاسبه‌شده را عوض کند — این محدودیت فقط درباره‌ی غذاست، نه بوفه‌ی نوشیدنی.
+    const mainRedMeat = makeDish({
+      id: 'main-red',
+      category: 'غذای اصلی',
+      proteinSource: 'red-meat',
+      costPerServing: 400_000,
+      nutrition: { proteinGrams: 200, carbGrams: 10, fatGrams: 10, fiberGrams: null, calories: null },
+    })
+    const highProteinDrink = makeDish({
+      id: 'drink-fish',
+      category: 'نوشیدنی',
+      proteinSource: 'fish-shrimp',
+      costPerServing: 20_000,
+      // به‌قدر کافی بزرگ که اگر (به‌اشتباه) در محاسبه‌ی سهم منابع لحاظ شود، سهم گوشت قرمز را از
+      // ۹۵٪ به ۵۶٪ (فاصله‌ی ۴۴ واحد، فراتر از تحمل ۱۰) برساند، ولی نه آن‌قدر بزرگ که به‌تنهایی
+      // سقف مجاز پروتئین کل رویداد (Hard Constraint دیگری، بی‌ربط به این تست) را رد کند.
+      nutrition: { proteinGrams: 150, carbGrams: 0, fatGrams: 0, fiberGrams: null, calories: null },
+    })
+    const lowProteinSide = (id: string, category: 'پیش‌غذا' | 'دسر') =>
+      makeDish({ id, category, proteinSource: 'plant-other', costPerServing: 20_000, nutrition: { proteinGrams: 5, carbGrams: 10, fatGrams: 2, fiberGrams: null, calories: null } })
+    const others = [lowProteinSide('app', 'پیش‌غذا'), lowProteinSide('dessert', 'دسر')]
+    const plan = makePlan({ guestCount: 20, perPersonBudget: 2_000_000 })
+    const localSettings: AppSettings = {
+      ...settings,
+      menuOptimizer: {
+        ...defaultMenuOptimizerSettings,
+        proteinSourceDistributionTarget: { 'red-meat': 100, 'white-meat': 0, 'fish-shrimp': 0 },
+        proteinSourceDistributionTolerancePercent: 10,
+        minDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+        maxDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
+      },
+    }
+    const { proposals } = generateMenuProposals([mainRedMeat, highProteinDrink, ...others], plan, localSettings)
+
+    // اگر نوشیدنی در محاسبه لحاظ می‌شد، سهم گوشت قرمز به‌شدت رقیق می‌شد و هیچ ترکیبی هدف ۱۰۰٪ را
+    // برآورده نمی‌کرد؛ چون این‌طور نیست، حداقل یک پیشنهاد معتبر (با main-red) باید وجود داشته باشد.
+    expect(proposals.length).toBeGreaterThan(0)
+    expect(proposals.some((p) => p.dishes.some((d) => d.dishId === 'main-red'))).toBe(true)
   })
 })

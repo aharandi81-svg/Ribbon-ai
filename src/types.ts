@@ -256,6 +256,11 @@ export interface MenuOptimizerSettings {
   proteinMaxMultiplier: number
   /** توزیع هدف منابع پروتئین به درصد از کل پروتئین منو؛ سهم plant-other به‌طور ضمنی از باقیمانده محاسبه می‌شود. */
   proteinSourceDistributionTarget: Record<(typeof PROTEIN_SOURCE_DISTRIBUTION_KEYS)[number], number>
+  /** حداکثر انحراف مجاز (به واحد امتیاز درصد) سهم واقعی هر منبع پروتئین (بر مبنای گرم واقعی
+   * پروتئین از nutrition، نه تعداد قلم) از توزیع هدف پیش از رد کامل ترکیب — Hard Constraint، نه
+   * فقط یک امتیاز نرم. مثلاً ۲۰ یعنی سهم واقعی گوشت قرمز می‌تواند تا ۲۰ واحد درصد از هدف فاصله
+   * داشته باشد، نه بیشتر. */
+  proteinSourceDistributionTolerancePercent: number
   targetMenuProfiles: Record<TargetMenuProfileId, TargetMenuProfile>
   activeTargetProfileId: TargetMenuProfileId
   dishScoreWeights: DishScoreWeights

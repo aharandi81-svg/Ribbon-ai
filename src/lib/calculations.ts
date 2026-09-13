@@ -3,7 +3,9 @@ import type { AppSettings, Category, CookingMethod, Dish, EventPlan, Ingredient,
 const MACRO_KEYS: MacroKey[] = ['carb', 'protein', 'veg', 'fat']
 const DRINK_CATEGORY: Category = 'نوشیدنی'
 // دسته‌هایی که در محاسبه‌ی ترکیب تغذیه‌ای سفره لحاظ می‌شوند (نوشیدنی طبق مستند محصول مستثناست).
-const PLATE_CATEGORIES: Category[] = ['غذای اصلی', 'پیش‌غذا', 'دسر']
+// export شده چون menuOptimizer.ts هم برای محدودکردن محاسبه‌ی سهم منابع پروتئین به همین دسته‌های
+// «سفره‌ای» (نه نوشیدنی) از آن استفاده می‌کند — نگاه کنید به gramsBySourceFromServings آنجا.
+export const PLATE_CATEGORIES: Category[] = ['غذای اصلی', 'پیش‌غذا', 'دسر']
 
 export function zeroMacro(): Macro {
   return { carb: 0, protein: 0, veg: 0, fat: 0 }

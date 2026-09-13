@@ -15,8 +15,15 @@ import type {
   SelectedItem,
   TargetMenuProfile,
 } from '../types'
-import { MENU_STRATEGIES, PROTEIN_SOURCES, mealTypeIncludesBreakfast, mealTypeIncludesLunchOrDinner } from '../types'
-import { computeAllItemCalcs } from './calculations'
+import {
+  MENU_STRATEGIES,
+  PROTEIN_SOURCE_DISTRIBUTION_KEYS,
+  PROTEIN_SOURCE_LABELS,
+  PROTEIN_SOURCES,
+  mealTypeIncludesBreakfast,
+  mealTypeIncludesLunchOrDinner,
+} from '../types'
+import { PLATE_CATEGORIES, computeAllItemCalcs } from './calculations'
 
 // =============================================================================
 // Menu Optimization Engine
@@ -285,6 +292,7 @@ export interface ConstraintCheckResult {
 function checkHardConstraints(
   dishes: Dish[],
   totalProteinGrams: number,
+  gramsBySource: Record<ProteinSourceType, number>,
   costPerGuest: number | null,
   guestCount: number,
   plan: EventPlan,
@@ -316,6 +324,35 @@ function checkHardConstraints(
     violations.push(
       `پروتئین کل (${Math.round(totalProteinGrams)} گرم) از سقف مجاز (${Math.round(proteinMax)} گرم = ${settings.proteinMaxMultiplier}× هدف) عبور کرده است.`,
     )
+  }
+
+  // سهم منابع پروتئین (گوشت قرمز/سفید/ماهی‌میگو) دیگر صرفاً یک امتیاز نرم نیست — طبق درخواست
+  // «حتماً اعمال شود»، اگر سهم واقعی هر منبع (بر مبنای گرم واقعی پروتئین از کارت رسپی/دیتابیس
+  // غذا، نه تعداد قلم) بیش از تحمل مجاز از هدف تنظیمات فاصله بگیرد، کل ترکیب رد می‌شود. اگر کل
+  // پروتئین منو صفر باشد (مثلاً ترکیبی که هنوز هیچ غذای اصلی/پیش‌غذا/دسری ندارد)، این بررسی
+  // بی‌معناست و رد می‌شود.
+  const totalGramsAllSources = PROTEIN_SOURCES.reduce((s, k) => s + gramsBySource[k], 0)
+  if (totalGramsAllSources > 0) {
+    const plantOtherTarget = clamp(
+      100 - settings.proteinSourceDistributionTarget['red-meat'] - settings.proteinSourceDistributionTarget['white-meat'] - settings.proteinSourceDistributionTarget['fish-shrimp'],
+      0,
+      100,
+    )
+    const targetPercent: Record<ProteinSourceType, number> = {
+      'red-meat': settings.proteinSourceDistributionTarget['red-meat'],
+      'white-meat': settings.proteinSourceDistributionTarget['white-meat'],
+      'fish-shrimp': settings.proteinSourceDistributionTarget['fish-shrimp'],
+      'plant-other': plantOtherTarget,
+    }
+    for (const source of PROTEIN_SOURCE_DISTRIBUTION_KEYS) {
+      const actualPercent = (gramsBySource[source] / totalGramsAllSources) * 100
+      const deviation = Math.abs(actualPercent - targetPercent[source])
+      if (deviation > settings.proteinSourceDistributionTolerancePercent) {
+        violations.push(
+          `سهم واقعی «${PROTEIN_SOURCE_LABELS[source]}» از پروتئین کل (${Math.round(actualPercent)}٪) بیش از تحمل مجاز (${settings.proteinSourceDistributionTolerancePercent} واحد درصد) از هدف تنظیمات (${targetPercent[source]}٪) فاصله دارد.`,
+        )
+      }
+    }
   }
 
   const dishIds = new Set(dishes.map((d) => d.id))
@@ -420,6 +457,24 @@ export interface MenuScoreBreakdown {
   proteinSourceBreakdownPercent: Record<ProteinSourceType, number>
 }
 
+/** گرم واقعی پروتئین به تفکیک منبع (گوشت قرمز/سفید/ماهی‌میگو/گیاهی‌سایر)، وزن‌شده با تعداد پرس
+ * واقعی هر غذا (coverageCount) — نه شمارش تعداد قلم و نه وزن کل پرس؛ دقیقاً همان گرم واقعی
+ * dish.nutrition.proteinGrams که خودش از ترکیب ماکروی واقعیِ کارت رسپی هر غذا محاسبه شده است.
+ * فقط دسته‌های PLATE_CATEGORIES (غذای اصلی/پیش‌غذا/دسر) لحاظ می‌شوند — نوشیدنی عمداً مستثناست،
+ * دقیقاً همان استثنایی که در بقیه‌ی اپ برای ترکیب تغذیه‌ای سفره اعمال می‌شود (نگاه کنید به
+ * macroAlignmentScore در calculations.ts): وگرنه گرم پروتئین ناچیزِ نوشیدنی‌ها، سهم واقعی
+ * گوشت/مرغ/ماهی در «غذا»ی منو را بی‌ربط رقیق می‌کند و رسیدن به هدف تنظیمات عملاً غیرممکن (یا
+ * کاملاً بی‌معنا) می‌شود. مبنای مشترک هم امتیاز نرم تنوع پروتئین (proteinDiversityScore) و هم
+ * Hard Constraint سهم منابع پروتئین (نگاه کنید به checkHardConstraints). */
+function gramsBySourceFromServings(servings: CandidateServing[]): Record<ProteinSourceType, number> {
+  const gramsBySource: Record<ProteinSourceType, number> = { 'red-meat': 0, 'white-meat': 0, 'fish-shrimp': 0, 'plant-other': 0 }
+  for (const c of servings) {
+    if (!PLATE_CATEGORIES.includes(c.dish.category)) continue
+    gramsBySource[c.dish.proteinSource] += c.coverageCount * c.dish.nutrition.proteinGrams
+  }
+  return gramsBySource
+}
+
 export function computeMenuScore({ dishes, costPerGuest, guestCount, settings, plan, avgDishScore }: MenuScoreInputs): MenuScoreBreakdown {
   const opt = settings.menuOptimizer
   const w: MenuScoreWeights = opt.menuScoreWeights
@@ -429,8 +484,7 @@ export function computeMenuScore({ dishes, costPerGuest, guestCount, settings, p
   const totalFatGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.fatGrams, 0)
   const totalCarbGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.carbGrams, 0)
 
-  const gramsBySource: Record<ProteinSourceType, number> = { 'red-meat': 0, 'white-meat': 0, 'fish-shrimp': 0, 'plant-other': 0 }
-  for (const c of servings) gramsBySource[c.dish.proteinSource] += c.coverageCount * c.dish.nutrition.proteinGrams
+  const gramsBySource = gramsBySourceFromServings(servings)
   const totalForBreakdown = PROTEIN_SOURCES.reduce((s, k) => s + gramsBySource[k], 0)
   const proteinSourceBreakdownPercent: Record<ProteinSourceType, number> = { 'red-meat': 0, 'white-meat': 0, 'fish-shrimp': 0, 'plant-other': 0 }
   if (totalForBreakdown > 0) {
@@ -530,6 +584,15 @@ function isMultiMealSlotEvent(plan: EventPlan): boolean {
   return mealTypeIncludesBreakfast(plan.mealType) && mealTypeIncludesLunchOrDinner(plan.mealType)
 }
 
+/** حداقل تعداد گزینه از هر منبع پروتئین موجود در این دسته که تضمین می‌شود وارد کوتاه‌لیست شود،
+ * حتی اگر Dish Score کلی‌شان به اندازه‌ی کافی بالا نباشد که در ۱۰ تای برتر عمومی جا بگیرند.
+ * چرا لازم است: توزیع منابع پروتئین حالا یک Hard Constraint است (نگاه کنید به
+ * checkHardConstraints) — اگر یک منبع (مثلاً گوشت قرمز) به‌طور سیستماتیک در کوتاه‌لیست هیچ
+ * حضوری نداشته باشد (چون امتیاز کلی‌اش نسبت به بقیه پایین‌تر است، نه به این خاطر که غذایی از آن
+ * منبع وجود ندارد)، هدف تنظیمات برای آن منبع اصلاً از نظر ریاضی قابل‌دستیابی نیست، صرف‌نظر از
+ * اینکه تحمل مجاز چقدر زیاد باشد — موتور برای همیشه صفر پیشنهاد برمی‌گرداند. */
+const MIN_PER_PROTEIN_SOURCE_IN_SHORTLIST = 3
+
 function shortlistByCategory(pool: Dish[], scores: Map<string, number>, plan: EventPlan, category: Category): CandidateDish[] {
   const inCategory = pool.filter((d) => d.category === category)
   const mustInclude = inCategory.filter((d) => plan.dishConstraints[d.id] === 'must-include')
@@ -543,21 +606,43 @@ function shortlistByCategory(pool: Dish[], scores: Map<string, number>, plan: Ev
   // از هر دو نوع (صبحانه‌ای/غیرصبحانه‌ای) نماینده داشته باشد — وگرنه چون معمولاً امتیاز غذاهای
   // غیرصبحانه‌ای بالاتر است، کل کوتاه‌لیست (و در نتیجه هر ترکیبی که از آن ساخته شود) فقط از یک
   // وعده پر می‌شود و وعده‌ی دیگر اصلاً در پیشنهاد نهایی ظاهر نمی‌شود.
+  const restBudget = Math.max(0, SHORTLIST_SIZE_PER_CATEGORY - mustInclude.length - rankedPreferred.length)
   let rankedRest: Dish[]
   if (isMultiMealSlotEvent(plan) && category !== 'نوشیدنی') {
     const breakfastRest = rank(rest.filter((d) => d.isBreakfastItem))
     const nonBreakfastRest = rank(rest.filter((d) => !d.isBreakfastItem))
     if (breakfastRest.length > 0 && nonBreakfastRest.length > 0) {
-      const half = Math.ceil(SHORTLIST_SIZE_PER_CATEGORY / 2)
+      const half = Math.ceil(restBudget / 2)
       rankedRest = [...breakfastRest.slice(0, half), ...nonBreakfastRest.slice(0, half)]
     } else {
-      rankedRest = rank(rest)
+      rankedRest = rank(rest).slice(0, restBudget)
     }
   } else {
-    rankedRest = rank(rest)
+    rankedRest = rank(rest).slice(0, restBudget)
   }
 
-  const combined = [...mustInclude, ...rankedPreferred, ...rankedRest].slice(0, Math.max(SHORTLIST_SIZE_PER_CATEGORY, mustInclude.length))
+  // پوشش تضمینی منابع پروتئین: برای هر منبعی که در «rest» وجود دارد ولی در rankedRest بالا کمتر
+  // از MIN_PER_PROTEIN_SOURCE_IN_SHORTLIST نماینده دارد، بهترین گزینه‌های همان منبع از کل «rest»
+  // (نه فقط بخش بالا) اضافه می‌شود — کوتاه‌لیست را کمی بزرگ‌تر می‌کند، نه جایگزین انتخاب‌های قبلی.
+  const distinctSources = new Set(rest.map((d) => d.proteinSource))
+  const proteinCoverageExtras: Dish[] = []
+  if (distinctSources.size > 1) {
+    const includedIds = new Set(rankedRest.map((d) => d.id))
+    for (const source of distinctSources) {
+      const alreadyForSource = rankedRest.filter((d) => d.proteinSource === source).length
+      let need = MIN_PER_PROTEIN_SOURCE_IN_SHORTLIST - alreadyForSource
+      if (need <= 0) continue
+      for (const d of rank(rest.filter((d) => d.proteinSource === source))) {
+        if (need <= 0) break
+        if (includedIds.has(d.id)) continue
+        proteinCoverageExtras.push(d)
+        includedIds.add(d.id)
+        need--
+      }
+    }
+  }
+
+  const combined = [...mustInclude, ...rankedPreferred, ...rankedRest, ...proteinCoverageExtras]
   const seen = new Set<string>()
   const deduped = combined.filter((d) => (seen.has(d.id) ? false : (seen.add(d.id), true)))
   return deduped.map((d) => ({ dish: d, dishScore: scores.get(d.id) ?? 0 }))
@@ -774,14 +859,15 @@ export function generateMenuProposals(dishes: Dish[], plan: EventPlan, settings:
 
       const servings = computeCandidateServings(dishList, plan, settings)
       const totalProteinGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.proteinGrams, 0)
-      const hardCheck = checkHardConstraints(dishList, totalProteinGrams, null, plan.guestCount, plan, opt, mealSlotMixByCategory)
+      const gramsBySource = gramsBySourceFromServings(servings)
+      const hardCheck = checkHardConstraints(dishList, totalProteinGrams, gramsBySource, null, plan.guestCount, plan, opt, mealSlotMixByCategory)
 
       const missingPriceDishIds = dishList.filter((d) => d.costPerServing == null).map((d) => d.id)
       const totalCost = missingPriceDishIds.length > 0 ? null : servings.reduce((s, c) => s + (c.totalItemCost ?? 0), 0)
       const costPerGuest = totalCost != null && plan.guestCount > 0 ? totalCost / plan.guestCount : null
 
       // بازبینی مجدد Hard Constraint بودجه اکنون که costPerGuest واقعی محاسبه شده.
-      const fullHardCheck = checkHardConstraints(dishList, totalProteinGrams, costPerGuest, plan.guestCount, plan, opt, mealSlotMixByCategory)
+      const fullHardCheck = checkHardConstraints(dishList, totalProteinGrams, gramsBySource, costPerGuest, plan.guestCount, plan, opt, mealSlotMixByCategory)
       if (!hardCheck.valid || !fullHardCheck.valid) continue
 
       const avgDishScore = dishList.length > 0 ? dishList.reduce((s, d) => s + (scores.get(d.id) ?? 0), 0) / dishList.length : 0
