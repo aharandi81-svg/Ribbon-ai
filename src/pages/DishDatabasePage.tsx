@@ -16,6 +16,9 @@ const macroKeys: MacroKey[] = ['carb', 'protein', 'veg', 'fat']
 const macroLabels: Record<MacroKey, string> = { carb: 'کربوهیدرات', protein: 'پروتئین', veg: 'سبزیجات', fat: 'چربی' }
 const NO_CONSTRAINT = 'بدون محدودیت' as const
 const constraintOptions = [NO_CONSTRAINT, ...DISH_CONSTRAINT_TYPES] as const
+const REVIEWED = 'بررسی‌شده' as const
+const NOT_REVIEWED = 'بررسی‌نشده' as const
+const reviewFilterOptions = [ALL, REVIEWED, NOT_REVIEWED] as const
 
 export function DishDatabasePage() {
   const dishes = useAppStore((s) => s.dishes)
@@ -23,12 +26,14 @@ export function DishDatabasePage() {
   const settings = useAppStore((s) => s.settings)
   const setDishConstraint = useAppStore((s) => s.setDishConstraint)
   const upsertDishes = useAppStore((s) => s.upsertDishes)
+  const updateDish = useAppStore((s) => s.updateDish)
   const bulkAdjustPrices = useAppStore((s) => s.bulkAdjustPrices)
   const removeDish = useAppStore((s) => s.removeDish)
   const removeDishes = useAppStore((s) => s.removeDishes)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<Category | typeof ALL>(ALL)
   const [dietaryFilter, setDietaryFilter] = useState<DietaryTag | typeof ALL>(ALL)
+  const [reviewFilter, setReviewFilter] = useState<typeof reviewFilterOptions[number]>(ALL)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [exportMessage, setExportMessage] = useState<string | null>(null)
@@ -46,9 +51,11 @@ export function DishDatabasePage() {
       if (categoryFilter !== ALL && d.category !== categoryFilter) return false
       if (dietaryFilter !== ALL && !d.dietaryTags.includes(dietaryFilter)) return false
       if (search.trim() && !d.name.includes(search.trim())) return false
+      if (reviewFilter === REVIEWED && !d.dataReviewed) return false
+      if (reviewFilter === NOT_REVIEWED && d.dataReviewed) return false
       return true
     })
-  }, [dishes, search, categoryFilter, dietaryFilter])
+  }, [dishes, search, categoryFilter, dietaryFilter, reviewFilter])
 
   const handleExport = async () => {
     setExportMessage(null)
@@ -125,6 +132,7 @@ export function DishDatabasePage() {
         />
         <Select value={categoryFilter} onChange={setCategoryFilter} options={[ALL, ...CATEGORIES]} />
         <Select value={dietaryFilter} onChange={setDietaryFilter} options={dietaryFilterOptions} />
+        <Select value={reviewFilter} onChange={setReviewFilter} options={reviewFilterOptions} />
         <button
           type="button"
           onClick={allDishesSelected ? () => setSelectedIds(new Set()) : selectAllInDatabase}
@@ -229,6 +237,7 @@ export function DishDatabasePage() {
               <th className="px-2 py-2 text-start">
                 <Checkbox checked={allFilteredSelected} onChange={toggleSelectAllFiltered} className={someFilteredSelected && !allFilteredSelected ? 'opacity-70' : ''} />
               </th>
+              <th className="px-2 py-2 text-start">بررسی شده</th>
               <th className="px-2 py-2 text-start">نام</th>
               <th className="px-2 py-2 text-start">دسته</th>
               {macroKeys.map((k) => (
@@ -259,10 +268,29 @@ export function DishDatabasePage() {
               return (
                 <tr
                   key={dish.id}
-                  className={`border-b border-slate-100 align-top dark:border-slate-800 ${selectedIds.has(dish.id) ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''}`}
+                  className={`border-b border-slate-100 align-top dark:border-slate-800 ${
+                    selectedIds.has(dish.id)
+                      ? 'bg-amber-50/60 dark:bg-amber-900/10'
+                      : dish.dataReviewed
+                        ? 'bg-emerald-50/50 dark:bg-emerald-900/10'
+                        : ''
+                  }`}
                 >
                   <td className="px-2 py-2">
                     <Checkbox checked={selectedIds.has(dish.id)} onChange={() => toggleSelectOne(dish.id)} />
+                  </td>
+                  <td className="px-2 py-2">
+                    <Checkbox
+                      checked={dish.dataReviewed}
+                      onChange={(v) => updateDish(dish.id, { dataReviewed: v })}
+                      label={
+                        dish.dataReviewed ? (
+                          <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">✓ تأیید شده</span>
+                        ) : (
+                          <span className="text-xs text-slate-400 dark:text-slate-500">بررسی نشده</span>
+                        )
+                      }
+                    />
                   </td>
                   <td className="px-2 py-2 font-medium text-slate-800 dark:text-slate-200">{dish.name}</td>
                   <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{dish.category}</td>
@@ -405,7 +433,7 @@ export function DishDatabasePage() {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={21} className="px-2 py-6 text-center text-slate-400 dark:text-slate-500">
+                <td colSpan={22} className="px-2 py-6 text-center text-slate-400 dark:text-slate-500">
                   غذایی یافت نشد.
                 </td>
               </tr>

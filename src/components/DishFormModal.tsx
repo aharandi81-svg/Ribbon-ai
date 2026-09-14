@@ -55,8 +55,8 @@ function formFromDish(dish: Dish): NewDishInput {
 
 /** پاپ‌آپ فرم غذا — هم برای «افزودن غذای جدید» و هم برای «ویرایش غذای موجود» از همین یک فرم
  * استفاده می‌شود (با props دوگانه‌ی dish/initialCategory) تا تجربه‌ی افزودن و ویرایش کاملاً یکسان
- * باشد. در حالت ویرایش، ذخیره یعنی کاربر کل رکورد را مرور کرده — پس همه‌ی پرچم‌های Verified هم
- * درست مثل addDish روی true تنظیم می‌شوند. */
+ * باشد. در حالت ویرایش، ذخیره یعنی کاربر کل رکورد را مرور کرده — پس همه‌ی پرچم‌های Verified و
+ * dataReviewed هم درست مثل addDish روی true تنظیم می‌شوند. */
 export function DishFormModal({
   dish,
   initialCategory,
@@ -181,6 +181,7 @@ export function DishFormModal({
         needsNutritionReview: false,
         ingredients: form.ingredients,
         ingredientsCostTotal: computeIngredientsCostTotal(form.ingredients),
+        dataReviewed: true,
       })
       onClose(dish.id)
     } else {

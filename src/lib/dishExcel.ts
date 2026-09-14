@@ -294,6 +294,7 @@ export async function importDishesFromFile(file: File, existing: Dish[]): Promis
       defaultCookingMethodVerified: row[HEADERS.defaultCookingMethodVerified] != null
         ? String(row[HEADERS.defaultCookingMethodVerified]).trim() === YES
         : (target?.defaultCookingMethodVerified ?? false),
+      dataReviewed: target?.dataReviewed ?? false,
     }
 
     if (target) {

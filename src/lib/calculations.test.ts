@@ -62,6 +62,7 @@ function makeDish(overrides: Partial<Dish> & { id: string }): Dish {
     proteinSourceVerified: false,
     defaultCookingMethod: 'گریل',
     defaultCookingMethodVerified: false,
+    dataReviewed: false,
     ...overrides,
   }
 }

@@ -121,6 +121,9 @@ const USER_EDITABLE_DISH_FIELDS = [
   // با هر انتشار جدید دیتابیس غذا حفظ شود.
   'ingredients',
   'ingredientsCostTotal',
+  // تیک دستی «بررسی/تصحیح کردم» — دقیقاً به همین دلیل که بقیه‌ی این فهرست حفظ می‌شوند: با هر
+  // به‌روزرسانی dishes.json نباید صفر شود، وگرنه ردیابی بازبینی دستی کاربر بی‌فایده می‌شد.
+  'dataReviewed',
 ] as const
 
 function reconcileDishes(persisted: Dish[] | undefined): Dish[] {
@@ -399,6 +402,7 @@ export const useAppStore = create<AppState>()(
           proteinSourceVerified: true,
           defaultCookingMethod: input.defaultCookingMethod,
           defaultCookingMethodVerified: input.defaultCookingMethod != null,
+          dataReviewed: true,
         }
         set((state) => ({ dishes: [...state.dishes, newDish] }))
         return id
