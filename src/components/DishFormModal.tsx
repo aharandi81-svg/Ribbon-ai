@@ -76,6 +76,8 @@ export function DishFormModal({
   const [costText, setCostText] = useState(dish?.costPerServing ?? 0)
   const [submitted, setSubmitted] = useState(false)
   const [pickedIngredientName, setPickedIngredientName] = useState('')
+  const [ingredientQuery, setIngredientQuery] = useState('')
+  const [showIngredientDropdown, setShowIngredientDropdown] = useState(false)
   const [newIngredientQuantity, setNewIngredientQuantity] = useState(100)
 
   const patch = (p: Partial<NewDishInput>) => setForm((f) => ({ ...f, ...p }))
@@ -118,6 +120,20 @@ export function DishFormModal({
     return INGREDIENT_GROUP_ORDER.filter((g) => byGroup.has(g)).map((g) => ({ group: g, rows: byGroup.get(g)! }))
   }, [availableToAdd])
 
+  // فهرست ۲۷۰+ ماده‌ای دیتابیس با یک <select> ساده به‌سختی قابل‌مرور بود — همان الگوی سرچ
+  // PickDishModal (جستجوی غذا) اینجا هم برای جستجوی ماده اولیه تکرار شده است.
+  const ingredientSearchResults = useMemo(() => {
+    const q = ingredientQuery.trim()
+    if (!q) return availableByGroup
+    return availableByGroup.map(({ group, rows }) => ({ group, rows: rows.filter((r) => r.name.includes(q)) })).filter(({ rows }) => rows.length > 0)
+  }, [availableByGroup, ingredientQuery])
+
+  const pickIngredientFromSearch = (name: string) => {
+    setPickedIngredientName(name)
+    setIngredientQuery(name)
+    setShowIngredientDropdown(false)
+  }
+
   const addIngredientRow = () => {
     const row = catalogRows.find((r) => r.name === pickedIngredientName)
     if (!row || newIngredientQuantity <= 0) return
@@ -130,6 +146,7 @@ export function DishFormModal({
     }
     patch({ ingredients: [...(form.ingredients ?? []), newIngredient] })
     setPickedIngredientName('')
+    setIngredientQuery('')
     setNewIngredientQuantity(100)
   }
 
@@ -340,23 +357,48 @@ export function DishFormModal({
 
           <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/40">
             <Field label="افزودن ماده اولیه">
-              <select
-                value={pickedIngredientName}
-                onChange={(e) => setPickedIngredientName(e.target.value)}
-                className="w-56 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-              >
-                <option value="">— انتخاب ماده اولیه —</option>
-                {availableByGroup.map(({ group, rows }) => (
-                  <optgroup key={group} label={group}>
-                    {rows.map((r) => (
-                      <option key={r.name} value={r.name}>
-                        {r.name} ({r.unit}
-                        {r.unitPrice != null ? `، ${formatRial(r.unitPrice)}` : ''})
-                      </option>
+              <div className="relative w-56">
+                <input
+                  type="text"
+                  value={ingredientQuery}
+                  onChange={(e) => {
+                    setIngredientQuery(e.target.value)
+                    setPickedIngredientName('')
+                    setShowIngredientDropdown(true)
+                  }}
+                  onFocus={() => setShowIngredientDropdown(true)}
+                  onBlur={() => window.setTimeout(() => setShowIngredientDropdown(false), 150)}
+                  placeholder="جستجوی ماده اولیه…"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                />
+                {showIngredientDropdown && (
+                  <div className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                    {ingredientSearchResults.length === 0 && (
+                      <p className="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">ماده‌ای یافت نشد</p>
+                    )}
+                    {ingredientSearchResults.map(({ group, rows }) => (
+                      <div key={group}>
+                        <p className="bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500 dark:bg-slate-900 dark:text-slate-400">{group}</p>
+                        {rows.map((r) => (
+                          <button
+                            key={r.name}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => pickIngredientFromSearch(r.name)}
+                            className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-start text-sm hover:bg-amber-50 dark:hover:bg-slate-700"
+                          >
+                            <span className="text-slate-700 dark:text-slate-300">{r.name}</span>
+                            <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                              {r.unit}
+                              {r.unitPrice != null ? `، ${formatRial(r.unitPrice)}` : ''}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     ))}
-                  </optgroup>
-                ))}
-              </select>
+                  </div>
+                )}
+              </div>
             </Field>
             <Field label="مقدار">
               <NumberInput value={newIngredientQuantity} min={0} onChange={setNewIngredientQuantity} className="w-28" />
