@@ -86,7 +86,11 @@ describe('1. nutrition grams vs portion weight', () => {
     // یک پرس ۵۰۰ گرمی برنج سفید تقریباً پروتئین صفر دارد؛ اگر باگ رخ دهد و وزن پرس به‌جای
     // گرم پروتئین جمع شود، عدد به‌غلط ۵۰۰ می‌شود.
     const rice = makeDish({ id: 'rice', referencePortionGrams: 500, nutrition: { proteinGrams: 4, carbGrams: 110, fatGrams: 5, fiberGrams: null, calories: null } })
-    const score = computeMenuScore({ dishes: [rice], costPerGuest: 30_000, guestCount: 1, settings, plan: makePlan({ guestCount: 1 }), avgDishScore: 50 })
+    // totalGramsPerGuest برابر با همان ۵۰۰ گرم پرس رنج تنظیم شده تا سهم منصفانه‌ی این تست
+    // (computeFairSharePortionGrams) دقیقاً برابر کل پرس بماند — این تست درباره‌ی تشخیص
+    // پروتئین از وزن پرس است، نه مقیاس‌بندی سهم منصفانه.
+    const localSettings: AppSettings = { ...settings, nutritionTargets: { ...settings.nutritionTargets, totalGramsPerGuest: 500 } }
+    const score = computeMenuScore({ dishes: [rice], costPerGuest: 30_000, guestCount: 1, settings: localSettings, plan: makePlan({ guestCount: 1 }), avgDishScore: 50 })
     expect(score.totalProteinGrams).toBe(4)
     expect(score.totalProteinGrams).not.toBe(500)
   })
@@ -242,9 +246,13 @@ describe('8. budget overrun behavior — exclude vs penalize', () => {
     proteinSourceDistributionTolerancePercent: 100,
   }
   const plan = makePlan({ guestCount, perPersonBudget: 100_000, dishConstraints: { 'expensive-main': 'must-include' } })
+  // totalGramsPerGuest برابر با همان referencePortionGrams پیش‌فرض (۲۵۰) این دیش‌های ساختگی
+  // plant-other تنظیم شده تا سهم منصفانه (computeFairSharePortionGrams) آن‌ها را دست‌نخورده
+  // نگه دارد — این تست درباره‌ی رفتار عبور از بودجه است، نه مقیاس‌بندی سهم منصفانه.
+  const baseSettings: AppSettings = { ...settings, nutritionTargets: { ...settings.nutritionTargets, totalGramsPerGuest: 250 } }
 
   it('excludes the over-budget combo entirely when behavior is "exclude"', () => {
-    const localSettings: AppSettings = { ...settings, menuOptimizer: { ...localMenuOptSettings, budgetOverrunBehavior: 'exclude', budgetOverrunTolerancePercent: 0.05 } }
+    const localSettings: AppSettings = { ...baseSettings, menuOptimizer: { ...localMenuOptSettings, budgetOverrunBehavior: 'exclude', budgetOverrunTolerancePercent: 0.05 } }
     const { proposals } = generateMenuProposals([expensiveDish, ...cheapItems], plan, localSettings)
     for (const p of proposals) {
       expect(p.dishes.some((d) => d.dishId === 'expensive-main')).toBe(false)
@@ -252,7 +260,7 @@ describe('8. budget overrun behavior — exclude vs penalize', () => {
   })
 
   it('keeps the over-budget combo but with a reduced cost score when behavior is "penalize"', () => {
-    const localSettings: AppSettings = { ...settings, menuOptimizer: { ...localMenuOptSettings, budgetOverrunBehavior: 'penalize', budgetOverrunTolerancePercent: 0.05 } }
+    const localSettings: AppSettings = { ...baseSettings, menuOptimizer: { ...localMenuOptSettings, budgetOverrunBehavior: 'penalize', budgetOverrunTolerancePercent: 0.05 } }
     const { proposals } = generateMenuProposals([expensiveDish, ...cheapItems], plan, localSettings)
     const withExpensive = proposals.find((p) => p.dishes.some((d) => d.dishId === 'expensive-main'))
     expect(withExpensive).toBeDefined()
@@ -531,6 +539,10 @@ describe('15. cross-proposal variety — different strategies must be able to pi
     const plan = makePlan({ guestCount: 100, perPersonBudget: 2_000_000 })
     const testSettings: AppSettings = {
       ...settings,
+      // برابر با referencePortionGrams پیش‌فرض (۲۵۰) همه‌ی دیش‌های ساختگی این تست تنظیم شده تا
+      // سهم منصفانه (computeFairSharePortionGrams) آن‌ها را دست‌نخورده نگه دارد — این تست
+      // درباره‌ی تنوع بین پیشنهادهاست، نه مقیاس‌بندی سهم منصفانه.
+      nutritionTargets: { ...settings.nutritionTargets, totalGramsPerGuest: 250 },
       menuOptimizer: {
         ...settings.menuOptimizer,
         numberOfProposals: 5,
@@ -605,7 +617,11 @@ describe('16. hard constraint — protein source distribution must actually be e
 
   it('drinks and desserts never count toward the protein-source share — only PLATE_CATEGORIES do', () => {
     // یک نوشیدنی با پروتئین بالا و منبع متفاوت (fish-shrimp، فرضی) نباید بتواند سهم منابع
-    // پروتئین محاسبه‌شده را عوض کند — این محدودیت فقط درباره‌ی غذاست، نه بوفه‌ی نوشیدنی.
+    // پروتئین محاسبه‌شده را عوض کند — این محدودیت فقط درباره‌ی غذاست، نه بوفه‌ی نوشیدنی. مستقیماً
+    // computeMenuScore صدا زده می‌شود (نه کل generateMenuProposals) چون هدف این تست فقط بررسی
+    // ورودی محاسبه‌ی سهم منابع است، نه تعامل آن با محدودیت‌های سخت دیگر (مثل سقف پروتئین کل) —
+    // که با فرض «هر دسته با یک غذا سهم کامل هدف پروتئین را می‌گیرد» طبیعتاً به‌سرعت پر می‌شود
+    // وقتی چند دسته هم‌زمان گوشتی باشند؛ آن تعامل ربطی به «آیا نوشیدنی مستثناست یا نه» ندارد.
     const mainRedMeat = makeDish({
       id: 'main-red',
       category: 'غذای اصلی',
@@ -618,30 +634,33 @@ describe('16. hard constraint — protein source distribution must actually be e
       category: 'نوشیدنی',
       proteinSource: 'fish-shrimp',
       costPerServing: 20_000,
-      // به‌قدر کافی بزرگ که اگر (به‌اشتباه) در محاسبه‌ی سهم منابع لحاظ شود، سهم گوشت قرمز را از
-      // ۹۵٪ به ۵۶٪ (فاصله‌ی ۴۴ واحد، فراتر از تحمل ۱۰) برساند، ولی نه آن‌قدر بزرگ که به‌تنهایی
-      // سقف مجاز پروتئین کل رویداد (Hard Constraint دیگری، بی‌ربط به این تست) را رد کند.
-      nutrition: { proteinGrams: 150, carbGrams: 0, fatGrams: 0, fiberGrams: null, calories: null },
+      nutrition: { proteinGrams: 500, carbGrams: 0, fatGrams: 0, fiberGrams: null, calories: null },
     })
     const lowProteinSide = (id: string, category: 'پیش‌غذا' | 'دسر') =>
       makeDish({ id, category, proteinSource: 'plant-other', costPerServing: 20_000, nutrition: { proteinGrams: 5, carbGrams: 10, fatGrams: 2, fiberGrams: null, calories: null } })
-    const others = [lowProteinSide('app', 'پیش‌غذا'), lowProteinSide('dessert', 'دسر')]
+    const app = lowProteinSide('app', 'پیش‌غذا')
+    const dessert = lowProteinSide('dessert', 'دسر')
     const plan = makePlan({ guestCount: 20, perPersonBudget: 2_000_000 })
+    // totalGramsPerGuest برابر با referencePortionGrams پیش‌فرض (۲۵۰) تنظیم شده تا سهم منصفانه‌ی
+    // app/dessert (plant-other) دست‌نخورده بماند — این تست درباره‌ی سهم منابع پروتئین است، نه
+    // مقیاس‌بندی سهم منصفانه‌ی غذاهای بی‌ربط به گوشت.
     const localSettings: AppSettings = {
       ...settings,
-      menuOptimizer: {
-        ...defaultMenuOptimizerSettings,
-        proteinSourceDistributionTarget: { 'red-meat': 100, 'white-meat': 0, 'fish-shrimp': 0 },
-        proteinSourceDistributionTolerancePercent: 10,
-        minDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
-        maxDishesPerCategory: { 'غذای اصلی': 1, 'پیش‌غذا': 1, 'دسر': 1, 'نوشیدنی': 1 },
-      },
+      nutritionTargets: { ...settings.nutritionTargets, totalGramsPerGuest: 250 },
+      menuOptimizer: defaultMenuOptimizerSettings,
     }
-    const { proposals } = generateMenuProposals([mainRedMeat, highProteinDrink, ...others], plan, localSettings)
+    const score = computeMenuScore({
+      dishes: [mainRedMeat, highProteinDrink, app, dessert],
+      costPerGuest: 100_000,
+      guestCount: 20,
+      settings: localSettings,
+      plan,
+      avgDishScore: 50,
+    })
 
-    // اگر نوشیدنی در محاسبه لحاظ می‌شد، سهم گوشت قرمز به‌شدت رقیق می‌شد و هیچ ترکیبی هدف ۱۰۰٪ را
-    // برآورده نمی‌کرد؛ چون این‌طور نیست، حداقل یک پیشنهاد معتبر (با main-red) باید وجود داشته باشد.
-    expect(proposals.length).toBeGreaterThan(0)
-    expect(proposals.some((p) => p.dishes.some((d) => d.dishId === 'main-red'))).toBe(true)
+    // اگر نوشیدنی (fish-shrimp) در محاسبه لحاظ می‌شد، سهم گوشت قرمز به‌شدت رقیق می‌شد و سهم
+    // ماهی/میگو صفر نمی‌ماند؛ چون این‌طور نیست، یعنی نوشیدنی واقعاً مستثناست.
+    expect(score.proteinSourceBreakdownPercent['fish-shrimp']).toBe(0)
+    expect(score.proteinSourceBreakdownPercent['red-meat']).toBeGreaterThan(0)
   })
 })

@@ -40,6 +40,37 @@ export function effectiveConfidenceFactor(dish: Dish | undefined, plan: EventPla
   return base * plan.confidenceFactor
 }
 
+/**
+ * سهم واقعی یک مهمان از این غذا (گرم) — نه کل «پرس رسپی». کارت رسپی هر غذا یک پرس رستورانی کامل
+ * را توصیف می‌کند (مثلاً «باقالی پلو با گردن گوسفندی» با ۵۰۰ گرم گوشت، برای یک نفر در حالت
+ * رستورانی)؛ اما در بوفه یک مهمان چند غذا از یک دسته می‌خورد، پس باید فقط سهم منصفانه‌ی هدف
+ * تنظیمات را از این غذا بگیرد، نه کل پرس رسپی را. این سهم بین تعداد غذاهای واقعاً انتخاب‌شده‌ی
+ * همان دسته تقسیم می‌شود — هرچه دسته تنوع بیشتری داشته باشد (نزدیک‌تر به حداکثر مجاز)، سهم هر
+ * غذا کمتر می‌شود.
+ *
+ * دو شاخه، طبق منبع پروتئین غذا:
+ *   • غذای گوشتی (proteinSource غیر از plant-other): سهم بر مبنای هدف گوشت/پروتئین کل رویداد
+ *     (menuOptimizer.proteinTargetGramsPerGuest) تقسیم می‌شود — دقیقاً مثال «باقالی پلو».
+ *   • غذای بی‌ربط به گوشت (نوشیدنی/دسر/پیش‌غذای گیاهی، proteinSource = plant-other): همان منطق،
+ *     ولی به‌جای گرم پروتئین از وزن کل پرس و هدف وزن کل غذای هر مهمان
+ *     (nutritionTargets.totalGramsPerGuest) استفاده می‌شود.
+ *
+ * خروجی، «چند نفر یک پرس رسپی را سیر می‌کند» را ضمنی محاسبه می‌کند: هرچه این عدد کوچک‌تر از
+ * referencePortionGrams باشد، یعنی یک پرس رسپی برای چند مهمان کافی است، نه فقط یک نفر.
+ */
+export function computeFairSharePortionGrams(dish: Dish, dishesSelectedInCategory: number, settings: AppSettings): number {
+  const n = Math.max(1, dishesSelectedInCategory)
+  if (dish.proteinSource !== 'plant-other') {
+    const targetGramsPerGuestForThisDish = settings.menuOptimizer.proteinTargetGramsPerGuest / n
+    if (dish.nutrition.proteinGrams <= 0) return dish.referencePortionGrams
+    const peopleServedPerRecipePortion = dish.nutrition.proteinGrams / targetGramsPerGuestForThisDish
+    return dish.referencePortionGrams / peopleServedPerRecipePortion
+  }
+  const targetWeightPerGuestForThisDish = settings.nutritionTargets.totalGramsPerGuest / n
+  const peopleServedPerRecipePortion = dish.referencePortionGrams / targetWeightPerGuestForThisDish
+  return dish.referencePortionGrams / peopleServedPerRecipePortion
+}
+
 /** مجموع وزن رده‌ای همه‌ی آیتم‌های یک دسته غذایی مشخص در سناریو. */
 export function sumWeightsInCategory(
   items: SelectedItem[],
@@ -119,6 +150,10 @@ export interface ItemCalc {
    * اضافه اصلاً مصرف نشود، این عدد هدر می‌رود. برای غذای قابل‌نگهداری یا بدون قیمت صفر/نامشخص است. */
   wasteRiskAmount: number | null
   maxAffordableQty: number | null // null یعنی نامحدود/نامشخص (بدون قیمت)
+  /** قیمت مؤثر هر سرو در اندازه‌ی واقعی این آیتم (item.portionSize) — نه لزوماً dish.costPerServing
+   * که قیمت یک پرس کامل رسپی است؛ نگاه کنید به توضیح computeFairSharePortionGrams. برای نمایش در
+   * ستون «هزینه هر پرس» باید همین استفاده شود، نه dish.costPerServing خام. */
+  effectiveCostPerServing: number | null
   totalItemCost: number | null
   gramsPerGuestAvg: number
   gramsPerGuest: Macro
@@ -155,11 +190,19 @@ export function computeItemCalc(
   const batchQuantity = Math.round(coverageCount * confidenceFactor)
   const reserveQuantity = Math.max(0, batchQuantity - coverageCount)
 
+  // dish.costPerServing قیمت یک پرس کامل رسپی (referencePortionGrams) است — اگر item.portionSize
+  // (سهم واقعی این مهمان) کوچک‌تر از آن باشد (نگاه کنید به computeFairSharePortionGrams)، قیمت
+  // مؤثر هر سرو باید به همان نسبت کوچک‌تر شود، وگرنه هزینه‌ی کل یک پرس کامل به هر مهمان تحمیل
+  // می‌شود در حالی که او فقط سهمی از آن پرس را می‌گیرد.
   const costPerServing = dish?.costPerServing ?? null
-  const maxAffordableQty = costPerServing && costPerServing > 0 ? Math.floor(budgetShare / costPerServing) : null
-  const totalItemCost = costPerServing != null ? costPerServing * batchQuantity : null
+  const effectiveCostPerServing =
+    costPerServing != null && dish && dish.referencePortionGrams > 0
+      ? costPerServing * (item.portionSize / dish.referencePortionGrams)
+      : costPerServing
+  const maxAffordableQty = effectiveCostPerServing && effectiveCostPerServing > 0 ? Math.floor(budgetShare / effectiveCostPerServing) : null
+  const totalItemCost = effectiveCostPerServing != null ? effectiveCostPerServing * batchQuantity : null
   const wasteRiskAmount =
-    dish?.wasteRisk === 'فسادپذیر' && costPerServing != null ? costPerServing * reserveQuantity : null
+    dish?.wasteRisk === 'فسادپذیر' && effectiveCostPerServing != null ? effectiveCostPerServing * reserveQuantity : null
 
   const gramsPerGuestAvg = plan.guestCount > 0 ? (coverageCount / plan.guestCount) * item.portionSize : 0
 
@@ -184,6 +227,7 @@ export function computeItemCalc(
     budgetShare,
     confidenceFactor,
     batchQuantity,
+    effectiveCostPerServing,
     reserveQuantity,
     wasteRiskAmount,
     maxAffordableQty,

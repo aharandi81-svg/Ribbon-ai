@@ -201,7 +201,7 @@ function CategorySection({
                       </p>
                     </td>
                     {showCookingMethod && <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{item.cookingMethod ?? '—'}</td>}
-                    <td className="px-2 py-2 whitespace-nowrap">{formatRial(dish.costPerServing)}</td>
+                    <td className="px-2 py-2 whitespace-nowrap">{formatRial(calc.effectiveCostPerServing)}</td>
                     <td className="px-2 py-2 whitespace-nowrap">{formatRial(calc.budgetShare)}</td>
                     <td className="px-2 py-2">
                       <span

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { dishes as initialDishes } from '../data/dishes'
 import { defaultEventPlan, defaultSettings } from '../data/defaultSettings'
-import { computeIngredientsCostTotal } from '../lib/calculations'
+import { computeFairSharePortionGrams, computeIngredientsCostTotal } from '../lib/calculations'
 import type { CustomIngredientDef, CustomIngredients } from '../lib/ingredients'
 import type {
   AppSettings,
@@ -254,9 +254,15 @@ export const useAppStore = create<AppState>()(
         })),
 
       addSelectedItem: (category, dishId) => {
-        const { dishes } = get()
+        const { dishes, plan, settings } = get()
         const tier: Tier = 'استاندارد'
         const dish = dishes.find((d) => d.id === dishId)
+        const dishesById = new Map(dishes.map((d) => [d.id, d]))
+        // «حداقل ۱» چون خودِ این غذا هم دارد به همین دسته اضافه می‌شود — سهم منصفانه‌ی آن باید
+        // بین همه‌ی غذاهای این دسته که تا این لحظه انتخاب شده‌اند (شامل خودش) تقسیم شود؛ نگاه
+        // کنید به computeFairSharePortionGrams در lib/calculations.ts.
+        const alreadyInCategory = plan.selectedItems.filter((it) => dishesById.get(it.dishId)?.category === category).length
+        const portionSize = dish ? computeFairSharePortionGrams(dish, alreadyInCategory + 1, settings) : 250
         // سهم پوشش دیگر اینجا تعیین نمی‌شود — خودِ سیستم آن را هر بار از روی وزن خام این آیتم
         // (داده‌ی واقعی رویدادهای قبلی یا پیش‌فرض رده) در برابر کل دسته حساب می‌کند؛ نگاه کنید
         // به rawCoverageWeight در lib/calculations.ts.
@@ -264,7 +270,7 @@ export const useAppStore = create<AppState>()(
           itemId: makeId(),
           dishId,
           tier,
-          portionSize: dish?.referencePortionGrams ?? 250,
+          portionSize,
           cookingMethod: category === 'نوشیدنی' ? undefined : 'گریل',
         }
         set((state) => ({ plan: { ...state.plan, selectedItems: [...state.plan.selectedItems, newItem] } }))

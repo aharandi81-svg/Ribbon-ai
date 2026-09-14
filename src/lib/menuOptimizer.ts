@@ -23,7 +23,7 @@ import {
   mealTypeIncludesBreakfast,
   mealTypeIncludesLunchOrDinner,
 } from '../types'
-import { PLATE_CATEGORIES, computeAllItemCalcs } from './calculations'
+import { PLATE_CATEGORIES, computeAllItemCalcs, computeFairSharePortionGrams } from './calculations'
 
 // =============================================================================
 // Menu Optimization Engine
@@ -412,6 +412,21 @@ export interface CandidateServing {
    * محاسبه شده؛ نگاه کنید به batchQuantity در calculations.ts. */
   batchQuantity: number
   totalItemCost: number | null
+  /** سهم واقعی یک مهمان از این غذا (گرم) — از computeFairSharePortionGrams، نه لزوماً
+   * dish.referencePortionGrams کامل؛ مبنای مقیاس‌کردن گرم مواد مغذی هر مهمان (نگاه کنید به
+   * scaledNutritionGrams پایین‌تر) چون کارت رسپی معمولاً یک پرس رستورانی کامل را توصیف می‌کند،
+   * نه سهم یک مهمان بوفه از میان چند غذای همان دسته. */
+  portionSize: number
+}
+
+/** گرم واقعی یک مغذی (پروتئین/کربوهیدرات/چربی) که به ازای هر مهمانِ سرو‌شده از این غذا می‌رسد —
+ * نسبت سهم واقعی این مهمان (portionSize) به کل پرس کارت رسپی (dish.referencePortionGrams) را
+ * روی گرم کامل آن مغذی اعمال می‌کند. اگر این مقیاس‌بندی انجام نشود، هر مهمان انگار کل پرس
+ * رستورانی رسپی را می‌خورد، نه فقط سهم منصفانه‌اش را (نگاه کنید به computeFairSharePortionGrams). */
+function scaledNutritionGrams(serving: CandidateServing, key: 'proteinGrams' | 'carbGrams' | 'fatGrams'): number {
+  const { dish, portionSize } = serving
+  if (dish.referencePortionGrams <= 0) return dish.nutrition[key]
+  return dish.nutrition[key] * (portionSize / dish.referencePortionGrams)
 }
 
 /**
@@ -424,11 +439,17 @@ export interface CandidateServing {
  * را به‌جای فرض دلبخواه، از منطق تجاری واقعی و یک‌بار-تعریف‌شده‌ی پروژه بگیرد.
  */
 export function computeCandidateServings(dishes: Dish[], plan: EventPlan, settings: AppSettings): CandidateServing[] {
+  // چند غذای این ترکیب کاندید از همان دسته هستند — مبنای تقسیم سهم منصفانه‌ی هر غذا؛ نگاه کنید
+  // به computeFairSharePortionGrams در calculations.ts.
+  const countByCategory = new Map<Category, number>()
+  for (const d of dishes) countByCategory.set(d.category, (countByCategory.get(d.category) ?? 0) + 1)
+  const portionSizeByDishId = new Map(dishes.map((d) => [d.id, computeFairSharePortionGrams(d, countByCategory.get(d.category) ?? 1, settings)]))
+
   const selectedItems: SelectedItem[] = dishes.map((d) => ({
     itemId: d.id,
     dishId: d.id,
     tier: 'استاندارد',
-    portionSize: d.referencePortionGrams,
+    portionSize: portionSizeByDishId.get(d.id) ?? d.referencePortionGrams,
     cookingMethod: d.defaultCookingMethod ?? undefined,
   }))
   const syntheticPlan: EventPlan = { ...plan, selectedItems }
@@ -439,6 +460,7 @@ export function computeCandidateServings(dishes: Dish[], plan: EventPlan, settin
     coverageCount: calc.coverageCount,
     batchQuantity: calc.batchQuantity,
     totalItemCost: calc.totalItemCost,
+    portionSize: portionSizeByDishId.get(calc.dishId) ?? dishesById.get(calc.dishId)!.referencePortionGrams,
   }))
 }
 
@@ -470,7 +492,7 @@ function gramsBySourceFromServings(servings: CandidateServing[]): Record<Protein
   const gramsBySource: Record<ProteinSourceType, number> = { 'red-meat': 0, 'white-meat': 0, 'fish-shrimp': 0, 'plant-other': 0 }
   for (const c of servings) {
     if (!PLATE_CATEGORIES.includes(c.dish.category)) continue
-    gramsBySource[c.dish.proteinSource] += c.coverageCount * c.dish.nutrition.proteinGrams
+    gramsBySource[c.dish.proteinSource] += c.coverageCount * scaledNutritionGrams(c, 'proteinGrams')
   }
   return gramsBySource
 }
@@ -480,9 +502,9 @@ export function computeMenuScore({ dishes, costPerGuest, guestCount, settings, p
   const w: MenuScoreWeights = opt.menuScoreWeights
 
   const servings = computeCandidateServings(dishes, plan, settings)
-  const totalProteinGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.proteinGrams, 0)
-  const totalFatGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.fatGrams, 0)
-  const totalCarbGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.carbGrams, 0)
+  const totalProteinGrams = servings.reduce((s, c) => s + c.coverageCount * scaledNutritionGrams(c, 'proteinGrams'), 0)
+  const totalFatGrams = servings.reduce((s, c) => s + c.coverageCount * scaledNutritionGrams(c, 'fatGrams'), 0)
+  const totalCarbGrams = servings.reduce((s, c) => s + c.coverageCount * scaledNutritionGrams(c, 'carbGrams'), 0)
 
   const gramsBySource = gramsBySourceFromServings(servings)
   const totalForBreakdown = PROTEIN_SOURCES.reduce((s, k) => s + gramsBySource[k], 0)
@@ -858,7 +880,7 @@ export function generateMenuProposals(dishes: Dish[], plan: EventPlan, settings:
       if (scoredMenusByKey.has(key)) continue
 
       const servings = computeCandidateServings(dishList, plan, settings)
-      const totalProteinGrams = servings.reduce((s, c) => s + c.coverageCount * c.dish.nutrition.proteinGrams, 0)
+      const totalProteinGrams = servings.reduce((s, c) => s + c.coverageCount * scaledNutritionGrams(c, 'proteinGrams'), 0)
       const gramsBySource = gramsBySourceFromServings(servings)
       const hardCheck = checkHardConstraints(dishList, totalProteinGrams, gramsBySource, null, plan.guestCount, plan, opt, mealSlotMixByCategory)
 
@@ -956,17 +978,22 @@ function buildMenuProposal(menu: ScoredMenu, strategyId: MenuStrategyId, setting
   const servingByDishId = new Map(menu.servings.map((s) => [s.dish.id, s]))
   const proposalDishes: MenuProposalDish[] = menu.dishes.map((d) => {
     const serving = servingByDishId.get(d.id)
+    // سهم واقعی یک مهمان از این غذا، نه لزوماً کل پرس کارت رسپی — نگاه کنید به
+    // computeFairSharePortionGrams. هزینه‌ی نمایش‌داده‌شده هم باید متناسب با همین سهم کوچک‌تر
+    // شود، وگرنه totalCost نمایش‌داده‌شده با costPerServing × servingCount ناسازگار می‌شود.
+    const portionGrams = serving?.portionSize ?? d.referencePortionGrams
+    const scaleRatio = d.referencePortionGrams > 0 ? portionGrams / d.referencePortionGrams : 1
     return {
       dishId: d.id,
       dishName: d.name,
       category: d.category,
       proteinSource: d.proteinSource,
       cookingMethod: d.defaultCookingMethod,
-      portionGrams: d.referencePortionGrams,
-      proteinGrams: d.nutrition.proteinGrams,
-      carbGrams: d.nutrition.carbGrams,
-      fatGrams: d.nutrition.fatGrams,
-      costPerServing: d.costPerServing,
+      portionGrams,
+      proteinGrams: d.nutrition.proteinGrams * scaleRatio,
+      carbGrams: d.nutrition.carbGrams * scaleRatio,
+      fatGrams: d.nutrition.fatGrams * scaleRatio,
+      costPerServing: d.costPerServing != null ? d.costPerServing * scaleRatio : null,
       coverageCount: serving?.coverageCount ?? 0,
       servingCount: serving?.batchQuantity ?? 0,
       totalCost: serving?.totalItemCost ?? null,

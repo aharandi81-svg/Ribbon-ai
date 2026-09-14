@@ -5,6 +5,7 @@ import {
   categoryBudgetAmount,
   computeAllItemCalcs,
   computeCookingComplexity,
+  computeFairSharePortionGrams,
   computeIngredientsCostTotal,
   computeMacroStatus,
   computePlanSummary,
@@ -92,6 +93,63 @@ describe('tierCostCeilingAmount', () => {
     expect(tierCostCeilingAmount(plan, settings, 'شاخص')).toBeCloseTo(120_000)
     const biggerPlan = makePlan({ perPersonBudget: 10_000_000 })
     expect(tierCostCeilingAmount(biggerPlan, settings, 'شاخص')).toBeCloseTo(1_200_000)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// computeFairSharePortionGrams: کارت رسپی یک پرس رستورانی کامل را توصیف می‌کند (مثلاً «باقالی
+// پلو با گردن گوسفندی» با ۵۰۰ گرم گوشت، برای یک نفر در حالت رستورانی)، ولی در بوفه یک مهمان
+// چند غذای همان دسته را با هم می‌خورد، پس فقط باید سهم منصفانه‌ی هدف تنظیمات را از این غذا
+// بگیرد — نه کل پرس رسپی را.
+// ---------------------------------------------------------------------------
+describe('computeFairSharePortionGrams', () => {
+  it('meat branch: splits the recipe portion so each of N main dishes contributes an equal share of the meat target (باقالی پلو example)', () => {
+    // دقیقاً مثال کاربر: پرس رسپی ۵۰۰ گرم گوشت دارد، هدف پروتئین ۳۰۰ گرم است، ۳ غذای اصلی
+    // انتخاب شده (بین حداقل ۲ و حداکثر ۴) → سهم هر غذا ۱۰۰ گرم → یک پرس رسپی باید بین ۵ مهمان
+    // تقسیم شود (۵۰۰ ÷ ۱۰۰ = ۵ نفر)، یعنی سهم هر مهمان از پرس رسپی = ۵۰۰ ÷ ۵ = ۱۰۰ گرم.
+    const baghaliPolo = makeDish({
+      id: 'baghali-polo',
+      category: 'غذای اصلی',
+      proteinSource: 'red-meat',
+      referencePortionGrams: 500,
+      nutrition: { proteinGrams: 500, carbGrams: 0, fatGrams: 0, fiberGrams: null, calories: null },
+    })
+    const localSettings: AppSettings = { ...settings, menuOptimizer: { ...settings.menuOptimizer, proteinTargetGramsPerGuest: 300 } }
+    expect(computeFairSharePortionGrams(baghaliPolo, 3, localSettings)).toBeCloseTo(100, 5)
+  })
+
+  it('meat branch: fewer selected dishes in the category means a bigger share per dish (not smaller)', () => {
+    const dish = makeDish({
+      id: 'meat-dish',
+      category: 'غذای اصلی',
+      proteinSource: 'white-meat',
+      referencePortionGrams: 400,
+      nutrition: { proteinGrams: 100, carbGrams: 0, fatGrams: 0, fiberGrams: null, calories: null },
+    })
+    const localSettings: AppSettings = { ...settings, menuOptimizer: { ...settings.menuOptimizer, proteinTargetGramsPerGuest: 200 } }
+    const shareWithTwoDishes = computeFairSharePortionGrams(dish, 2, localSettings)
+    const shareWithFourDishes = computeFairSharePortionGrams(dish, 4, localSettings)
+    expect(shareWithTwoDishes).toBeGreaterThan(shareWithFourDishes)
+  })
+
+  it('weight branch: dishes with no meaningful protein target (drinks, plant-based) split the recipe portion by total weight, not protein', () => {
+    // یک آب‌میوه با پرس رسپی ۱۰۰۰ گرمی — اگر ۴ نوشیدنی هم‌زمان انتخاب شده باشد، سهم هر مهمان
+    // باید ¼ آن (بر مبنای totalGramsPerGuest، نه پروتئین) باشد.
+    const juice = makeDish({
+      id: 'juice',
+      category: 'نوشیدنی',
+      proteinSource: 'plant-other',
+      referencePortionGrams: 1000,
+      nutrition: { proteinGrams: 1, carbGrams: 50, fatGrams: 0, fiberGrams: null, calories: null },
+    })
+    const localSettings: AppSettings = { ...settings, nutritionTargets: { ...settings.nutritionTargets, totalGramsPerGuest: 1000 } }
+    expect(computeFairSharePortionGrams(juice, 4, localSettings)).toBeCloseTo(250, 5)
+  })
+
+  it('never divides by zero when only one dish is selected in the category', () => {
+    const dish = makeDish({ id: 'solo', category: 'غذای اصلی', proteinSource: 'red-meat', referencePortionGrams: 300, nutrition: { proteinGrams: 60, carbGrams: 0, fatGrams: 0, fiberGrams: null, calories: null } })
+    expect(() => computeFairSharePortionGrams(dish, 0, settings)).not.toThrow()
+    expect(computeFairSharePortionGrams(dish, 0, settings)).toBe(computeFairSharePortionGrams(dish, 1, settings))
   })
 })
 
@@ -367,9 +425,12 @@ describe('computePlanSummary', () => {
       ['priced', priced],
       ['unpriced', unpriced],
     ])
+    // portionSize == referencePortionGrams (۲۵۰) عمداً — این تست درباره‌ی رفتار «قیمت نامشخص»
+    // است، نه مقیاس‌بندی هزینه بر اساس سهم پرس (نگاه کنید به computeFairSharePortionGrams)؛
+    // اگر اینجا با هم فرق داشتند، هزینه‌ی مؤثر هر پرس دیگر برابر dish.costPerServing نمی‌بود.
     const items: SelectedItem[] = [
-      { itemId: '1', dishId: 'priced', tier: 'استاندارد', portionSize: 200 },
-      { itemId: '2', dishId: 'unpriced', tier: 'استاندارد', portionSize: 200 },
+      { itemId: '1', dishId: 'priced', tier: 'استاندارد', portionSize: 250 },
+      { itemId: '2', dishId: 'unpriced', tier: 'استاندارد', portionSize: 250 },
     ]
     const plan = makePlan({ selectedItems: items })
     const summary = computePlanSummary(plan, dishesById, settings)
