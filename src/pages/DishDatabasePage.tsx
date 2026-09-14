@@ -110,6 +110,9 @@ export function DishDatabasePage() {
     setSelectedIds(new Set())
   }
 
+  const allDishesSelected = dishes.length > 0 && dishes.every((d) => selectedIds.has(d.id))
+  const selectAllInDatabase = () => setSelectedIds(new Set(dishes.map((d) => d.id)))
+
   return (
     <Card title={`دیتابیس غذاها (${dishes.length} غذا)`}>
       <div className="mb-4 flex flex-wrap items-end gap-3">
@@ -122,6 +125,13 @@ export function DishDatabasePage() {
         />
         <Select value={categoryFilter} onChange={setCategoryFilter} options={[ALL, ...CATEGORIES]} />
         <Select value={dietaryFilter} onChange={setDietaryFilter} options={dietaryFilterOptions} />
+        <button
+          type="button"
+          onClick={allDishesSelected ? () => setSelectedIds(new Set()) : selectAllInDatabase}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          {allDishesSelected ? 'لغو انتخاب همه' : `✓ انتخاب همه‌ی ${dishes.length} غذای دیتابیس`}
+        </button>
 
         <div className="flex-1" />
 
