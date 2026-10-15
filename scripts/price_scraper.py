@@ -84,48 +84,86 @@ def parse_weight(title):
 
 
 # ---------------------------------------------------------------- parsehshop
+PARSEH_SEARCH = "https://parsehshop.ir/search"
+PARSEH_DEBUG_FILE = "parseh_debug.html"
+
+
+def price_to_toman(text):
+    """'۱۲۵,۰۰۰ تومان' -> 125000 ؛ اگر واحد «ریال» بود تقسیم بر ۱۰."""
+    price = to_int_price(text)
+    if price and "ریال" in text:
+        price //= 10
+    return price
+
+
+def first_match(node, *selectors):
+    """اولین selector که جواب داد (به ترتیب اولویت، نه ترتیب در صفحه)."""
+    for selector in selectors:
+        found = node.select_one(selector)
+        if found is not None:
+            return found
+    return None
+
+
 def search_parsehshop(query):
     """
-    parsehshop.ir روی ووکامرس است؛ جستجو با ?s=...&post_type=product.
-    اگر فقط یک نتیجه باشد ووکامرس مستقیم به صفحه محصول ریدایرکت می‌کند،
-    پس هر دو حالت (لیست نتایج / صفحه محصول) پوشش داده شده.
+    parsehshop.ir روی پرستاشاپ (PrestaShop) است، نه ووکامرس.
+    ۱) اول جستجوی AJAX پرستاشاپ ۱.۷ که JSON برمی‌گرداند (مطمئن‌ترین راه).
+    ۲) اگر JSON نبود، HTML صفحه جستجو با BeautifulSoup خوانده می‌شود
+       (قالب‌های پرستاشاپ ۱.۷ و ۱.۶).
+    اگر هیچ محصولی پیدا نشد، HTML صفحه در parseh_debug.html ذخیره می‌شود تا بررسی شود.
     خروجی: {"title", "price" (تومان), "url"} یا None.
     """
+    params = {"controller": "search", "s": query, "search_query": query}
+
+    # ۱) JSON
     resp = session.get(
-        "https://parsehshop.ir/",
-        params={"s": query, "post_type": "product"},
+        PARSEH_SEARCH,
+        params={**params, "ajax": 1, "resultsPerPage": 10},
+        headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"},
         timeout=TIMEOUT,
     )
     resp.raise_for_status()
+    try:
+        products = resp.json().get("products") or []
+    except ValueError:
+        products = []
+    for product in products:
+        price_text = str(product.get("price") or "")
+        price = price_to_toman(price_text)
+        if price:
+            return {
+                "title": " ".join(BeautifulSoup(product.get("name") or "", "html.parser").get_text(" ").split()),
+                "price": price,
+                "url": product.get("url") or product.get("link") or "",
+            }
+
+    # ۲) HTML
+    resp = session.get(PARSEH_SEARCH, params=params, timeout=TIMEOUT)
+    resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
-
-    # حالت ۱: لیست نتایج -> اولین محصول
-    container = soup.select_one("ul.products li.product, .products .product")
-    url = None
-    if container is not None:
-        link = container.select_one("a.woocommerce-LoopProduct-link, a[href]")
-        url = urljoin(resp.url, link["href"]) if link else None
-        title_el = container.select_one(
-            ".woocommerce-loop-product__title, h2, h3, .product-title"
+    cards = soup.select(
+        "article.product-miniature, .js-product-miniature, "      # پرستاشاپ ۱.۷
+        "ul.product_list li.ajax_block_product, .product-container"  # پرستاشاپ ۱.۶
+    )
+    for card in cards:
+        price_el = first_match(
+            card, ".product-price-and-shipping .price", "span.price", ".product-price", ".price"
         )
-    else:
-        # حالت ۲: صفحه تکی محصول
-        container = soup.select_one(".summary, .product .entry-summary, div.product")
-        if container is None:
-            return None
-        url = resp.url
-        title_el = soup.select_one("h1.product_title, h1")
+        price = price_to_toman(price_el.get_text()) if price_el else None
+        if not price:
+            continue  # ناموجود / بدون قیمت
+        link = first_match(card, ".product-title a", "a.product-name", "h3 a", "h2 a", "a[href]")
+        return {
+            "title": (link.get("title") or link.get_text(strip=True)) if link else "",
+            "price": price,
+            "url": urljoin(resp.url, link["href"]) if link and link.get("href") else "",
+        }
 
-    price_el = container.select_one(".price")
-    if price_el is None:
-        return None
-    # اگر تخفیف دارد، قیمت جدید داخل <ins> است
-    amount = price_el.select_one("ins .amount") or price_el.select_one(".amount") or price_el
-    return {
-        "title": title_el.get_text(strip=True) if title_el else "",
-        "price": to_int_price(amount.get_text()),
-        "url": url,
-    }
+    with open(PARSEH_DEBUG_FILE, "w", encoding="utf-8") as fh:
+        fh.write(resp.text)
+    print(f"[parsehshop] محصولی برای «{query}» پیدا نشد؛ HTML صفحه در {PARSEH_DEBUG_FILE} ذخیره شد.")
+    return None
 
 
 # ---------------------------------------------------------------- digikala
