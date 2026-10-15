@@ -9,7 +9,7 @@
 بدون مرورگر؛ فقط requests + BeautifulSoup + openpyxl.
 
 ستون‌های اکسل: نام ماده، نام محصول، مقدار، واحد، قیمت (تومان)،
-قیمت هر گرم/میلی‌لیتر (ریال)، سایت، لینک محصول.
+قیمت هر کیلو/لیتر (تومان)، سایت، لینک محصول.
 وزن از عنوان محصول خوانده می‌شود (مثلاً «آرد ۱ کیلوگرمی» یا «روغن ۱/۵ لیتری»).
 """
 
@@ -41,46 +41,69 @@ session = requests.Session()
 session.headers.update(HEADERS)
 
 
+# عدد با جداکننده هزارگان (, ٬ ،) و اعشار اختیاری (. ٫)
+PRICE_NUMBER_RE = re.compile(r"\d{1,3}(?:[,٬،]\d{3})+(?:[.٫]\d+)?|\d+(?:[.٫]\d+)?")
+
+
 def to_int_price(text):
-    """'۱۲۵,۰۰۰ تومان' -> 125000 ؛ اگر عددی نبود None."""
+    """
+    '۱۲۵,۰۰۰ تومان' -> 125000 ؛ اگر عددی نبود None.
+    فقط اولین عدد (غیر از درصد تخفیف) خوانده می‌شود و اعشار دور ریخته می‌شود:
+    '۲۰٪ ۱۲۵,۰۰۰ تومان' -> 125000 ؛ '۱۲۵٬۰۰۰٫۰۰' -> 125000.
+    """
     if not text:
         return None
-    digits = re.sub(r"\D", "", text.translate(PERSIAN_DIGITS))
-    return int(digits) if digits else None
+    text = text.translate(PERSIAN_DIGITS)
+    for match in PRICE_NUMBER_RE.finditer(text):
+        if re.match(r"\s*[%٪]", text[match.end():]):
+            continue  # درصد تخفیف
+        integer = re.split(r"[.٫]", match.group())[0]
+        return int(re.sub(r"\D", "", integer))
+    return None
 
 
 # ---------------------------------------------------------------- weight
-# (الگوی واحد، ضریب تبدیل، واحد پایه) — واحدهای طولانی‌تر اول، تا «کیلوگرم» با «گرم» اشتباه نشود
+# (الگوی واحد، ضریب تبدیل، واحد پایه) — داخل هر گروه، طولانی‌تر اول تا «کیلوگرم» با «گرم» اشتباه نشود
 UNITS = [
     (r"کیلو\s*گرم|کیلو|kg", 1000, "گرم"),
     (r"میلی\s*گرم|mg", 0.001, "گرم"),
-    (r"گرم|gr|g", 1, "گرم"),
     (r"میلی\s*لیتر|سی\s*سی|ml|cc", 1, "میلی‌لیتر"),
+    (r"گرم|gr|g", 1, "گرم"),
     (r"لیتر|lit", 1000, "میلی‌لیتر"),
 ]
 NUMBER = r"(\d+(?:\.\d+)?)"
-PACK_RE = re.compile(r"(\d+)\s*عدد")
+UNIT_RE = re.compile(
+    NUMBER + r"\s*(?:" + "|".join(f"(?P<u{i}>{pattern})" for i, (pattern, _, _) in enumerate(UNITS)) + r")(?![a-z])"
+)
+# ضرب در تعداد فقط با الگوی صریح «۶ عدد × ۴۰۰ گرم» یا «۴۰۰ گرم × ۶ عدد»
+PACK_RE = re.compile(r"(\d+)\s*عدد\S*\s*[×x*]\s*$|^\S*\s*[×x*]\s*(\d+)\s*عدد")
 
 
 def parse_weight(title):
     """
     «شکر سفید ۹۰۰ گرمی» -> (900, 'گرم') ؛ «روغن ۱/۵ لیتری» -> (1500, 'میلی‌لیتر')
-    «بسته ۶ عددی ۲۰۰ گرمی» -> (1200, 'گرم') ؛ اگر وزن پیدا نشد (None, None).
+    «۶ عدد × ۲۰۰ گرم» -> (1200, 'گرم') ؛ «بسته ۶ عددی ۲۰۰ گرمی» -> (200, 'گرم')
+    اگر وزن پیدا نشد (None, None).
     """
     if not title:
         return None, None
     text = title.translate(PERSIAN_DIGITS).replace("‌", " ").lower()
+    # جداکننده هزارگان: ۱٬۰۰۰ و 1,500
+    text = re.sub(r"(\d)[,٬،](?=\d{3}(?!\d))", r"\1", text)
     # اعشار فارسی: ۱/۵ و ۱٫۵ یعنی 1.5
     text = re.sub(r"(\d)\s*[/٫]\s*(\d)", r"\1.\2", text)
-    for pattern, factor, base in UNITS:
-        match = re.search(NUMBER + r"\s*(?:" + pattern + r")(?![a-z])", text)
-        if match:
-            qty = float(match.group(1)) * factor
-            pack = PACK_RE.search(text)
-            if pack and int(pack.group(1)) > 1:
-                qty *= int(pack.group(1))
-            return round(qty, 3), base
-    return None, None
+    match = UNIT_RE.search(text)  # اولین واحد به ترتیب متن
+    if not match:
+        return None, None
+    index = next(i for i in range(len(UNITS)) if match.group(f"u{i}"))
+    _, factor, base = UNITS[index]
+    qty = float(match.group(1)) * factor
+    pack = PACK_RE.search(text[:match.start()]) or PACK_RE.search(text[match.end():])
+    if pack:
+        count = int(pack.group(1) or pack.group(2))
+        if count > 1:
+            qty *= count
+    return round(qty, 3), base
 
 
 # ---------------------------------------------------------------- name matching
@@ -91,6 +114,9 @@ NOISE_WORDS = {
     "ای", "وزن", "حجم", "مقدار", "حدود", "تقریبی", "g", "gr", "kg", "ml", "cc", "x",
 }
 WORD_SUFFIXES = ("", "ی", "ای", "یی", "ها", "های", "هایی")
+# اگر این کلمات در عنوان باشند ولی در نام ماده نه، محصول چیز دیگری است
+# (کرفس ≠ دانه کرفس، پیاز ≠ پودر پیاز)
+NEGATIVE_WORDS = {"پودر", "دانه", "چیپس", "طعم", "اسانس", "عصاره", "پفک", "سس"}
 
 
 def normalize(text):
@@ -117,6 +143,9 @@ def match_score(query, title):
     q_words, t_words = normalize(query), normalize(title)
     if not q_words:
         return None
+    for neg in NEGATIVE_WORDS:
+        if not any(word_matches(neg, qw) for qw in q_words) and any(word_matches(neg, tw) for tw in t_words):
+            return None
     positions = []
     for qw in q_words:
         hits = [i for i, tw in enumerate(t_words) if word_matches(qw, tw) and i not in positions]
@@ -153,12 +182,125 @@ PARSEH_SEARCH = "https://parsehshop.ir/search"
 PARSEH_DEBUG_FILE = "parseh_debug.html"
 
 
-def price_to_toman(text):
-    """'۱۲۵,۰۰۰ تومان' -> 125000 ؛ اگر واحد «ریال» بود تقسیم بر ۱۰."""
-    price = to_int_price(text)
-    if price and "ریال" in text:
+RIAL_RE = re.compile(r"ریال|﷼|\bIRR\b|\bRIAL\b", re.IGNORECASE)
+TOMAN_RE = re.compile(r"تومان|\bIRT\b|\bTOMAN\b", re.IGNORECASE)
+# در HTML پرستاشاپ: var prestashop = {..."currency":{..."iso_code":"IRR","sign":"﷼"...}}
+PAGE_CURRENCY_RE = re.compile(r'"currency"\s*:\s*\{[^{}]*?"iso_code"\s*:\s*"([A-Za-z]{3})"')
+
+
+def detect_currency(*texts):
+    """'rial' یا 'toman' از روی اولین متنی که واحد پول در آن صریح آمده؛ وگرنه None."""
+    for text in texts:
+        text = str(text or "")
+        if RIAL_RE.search(text):
+            return "rial"
+        if TOMAN_RE.search(text):
+            return "toman"
+    return None
+
+
+def price_to_toman(text, currency=None):
+    """
+    '۱۲۵,۰۰۰ تومان' -> 125000 ؛ '۱,۲۵۰,۰۰۰ ریال' -> 125000.
+    currency ('rial'/'toman') اگر داده شود بر متن مقدم است؛ اگر هیچ‌کدام نبود تومان فرض می‌شود.
+    """
+    price = to_int_price(str(text or ""))
+    if price and (currency or detect_currency(text)) == "rial":
         price //= 10
     return price
+
+
+def is_truthy_flag(value):
+    return value not in (False, 0, "0", "", None)
+
+
+def parseh_json_available(product):
+    """کالای ناموجود پرستاشاپ: availability=unavailable یا available_for_order=0 یا موجودی صفر."""
+    if str(product.get("availability") or "").lower() == "unavailable":
+        return False
+    if "available_for_order" in product and not is_truthy_flag(product["available_for_order"]):
+        return False
+    quantity = product.get("quantity")
+    if quantity is not None and not is_truthy_flag(product.get("allow_oosp")):
+        try:
+            if int(float(quantity)) <= 0:
+                return False
+        except (TypeError, ValueError):
+            pass
+    return True
+
+
+def parse_parseh_json(data):
+    """
+    پاسخ JSON جستجوی AJAX پرستاشاپ -> لیست محصولات موجود و قیمت‌دار.
+    قیمت از price_amount (عدد خام) خوانده می‌شود، نه price (رشته فرمت‌شده)؛
+    واحد پول از فیلد currency (اگر بود) یا از رشته price.
+    """
+    if not isinstance(data, dict):
+        return []
+    page_currency = data.get("currency")
+    if isinstance(page_currency, dict):
+        page_currency = page_currency.get("iso_code") or page_currency.get("sign")
+    candidates = []
+    for product in data.get("products") or []:
+        if not isinstance(product, dict) or not parseh_json_available(product):
+            continue
+        formatted = str(product.get("price") or "")
+        currency = detect_currency(product.get("currency_iso_code"), page_currency, formatted)
+        amount = product.get("price_amount")
+        if isinstance(amount, (int, float)) and amount > 0:
+            price = int(amount) // 10 if currency == "rial" else int(amount)
+        else:
+            price = price_to_toman(formatted, currency)
+        if price:
+            candidates.append({
+                "title": " ".join(BeautifulSoup(product.get("name") or "", "html.parser").get_text(" ").split()),
+                "price": price,
+                "url": product.get("url") or product.get("link") or "",
+            })
+    return candidates
+
+
+UNAVAILABLE_SELECTORS = ".product-unavailable, .out-of-stock, .product-flag.out_of_stock"
+
+
+def parse_parseh_html(html, base_url=PARSEH_SEARCH):
+    """HTML صفحه جستجوی پرستاشاپ (قالب ۱.۷ و ۱.۶) -> لیست محصولات موجود و قیمت‌دار."""
+    soup = BeautifulSoup(html, "html.parser")
+    page_match = PAGE_CURRENCY_RE.search(html)
+    page_currency = detect_currency(page_match.group(1)) if page_match else None
+    cards = soup.select(
+        "article.product-miniature, .js-product-miniature, "      # پرستاشاپ ۱.۷
+        "ul.product_list li.ajax_block_product, .product-container"  # پرستاشاپ ۱.۶
+    )
+    candidates, seen = [], set()
+    for card in cards:
+        if card.select_one(UNAVAILABLE_SELECTORS) or "ناموجود" in card.get_text():
+            continue
+        # قیمت قدیمی خط‌خورده و درصد تخفیف نباید با قیمت فعلی قاطی شوند
+        for old in card.select(".regular-price, .old-price, .discount, .discount-percentage, .price-percent-reduction"):
+            old.decompose()
+        price_el = first_match(
+            card, ".product-price-and-shipping .price", "span.price", ".product-price", ".price"
+        )
+        if not price_el:
+            continue
+        currency = detect_currency(price_el.get_text(), price_el.parent.get_text() if price_el.parent else "") \
+            or page_currency
+        price = price_to_toman(price_el.get_text(), currency)
+        if not price:
+            continue  # بدون قیمت
+        link = first_match(card, ".product-title a", "a.product-name", "h3 a", "h2 a", "a[href]")
+        url = urljoin(base_url, link["href"]) if link and link.get("href") else ""
+        if url in seen:  # کارت‌های تودرتو (article + .product-container) تکراری نشوند
+            continue
+        seen.add(url)
+        candidates.append({
+            "title": (link.get("title") or link.get_text(" ", strip=True)) if link else "",
+            "price": price,
+            "url": url,
+        })
+    return candidates
 
 
 def first_match(node, *selectors):
@@ -190,47 +332,16 @@ def search_parsehshop(query):
     )
     resp.raise_for_status()
     try:
-        products = resp.json().get("products") or []
+        candidates = parse_parseh_json(resp.json())
     except ValueError:
-        products = []
-    candidates = []
-    for product in products:
-        price = price_to_toman(str(product.get("price") or ""))
-        if price:
-            candidates.append({
-                "title": " ".join(BeautifulSoup(product.get("name") or "", "html.parser").get_text(" ").split()),
-                "price": price,
-                "url": product.get("url") or product.get("link") or "",
-            })
+        candidates = []
     if candidates:
         return candidates
 
     # ۲) HTML
     resp = session.get(PARSEH_SEARCH, params=params, timeout=TIMEOUT)
     resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, "html.parser")
-    cards = soup.select(
-        "article.product-miniature, .js-product-miniature, "      # پرستاشاپ ۱.۷
-        "ul.product_list li.ajax_block_product, .product-container"  # پرستاشاپ ۱.۶
-    )
-    seen = set()
-    for card in cards:
-        price_el = first_match(
-            card, ".product-price-and-shipping .price", "span.price", ".product-price", ".price"
-        )
-        price = price_to_toman(price_el.get_text()) if price_el else None
-        if not price:
-            continue  # ناموجود / بدون قیمت
-        link = first_match(card, ".product-title a", "a.product-name", "h3 a", "h2 a", "a[href]")
-        url = urljoin(resp.url, link["href"]) if link and link.get("href") else ""
-        if url in seen:  # کارت‌های تودرتو (article + .product-container) تکراری نشوند
-            continue
-        seen.add(url)
-        candidates.append({
-            "title": (link.get("title") or link.get_text(" ", strip=True)) if link else "",
-            "price": price,
-            "url": url,
-        })
+    candidates = parse_parseh_html(resp.text, resp.url)
 
     if not candidates:
         with open(PARSEH_DEBUG_FILE, "w", encoding="utf-8") as fh:
@@ -253,8 +364,16 @@ def search_digikala(query):
         timeout=TIMEOUT,
     )
     resp.raise_for_status()
+    return parse_digikala_json(resp.json())
+
+
+def parse_digikala_json(data):
+    """پاسخ API جستجوی دیجی‌کالا -> لیست محصولات قیمت‌دار (قیمت API ریال است -> تومان)."""
     candidates = []
-    for product in resp.json().get("data", {}).get("products", []):
+    data = (data.get("data") if isinstance(data, dict) else None) or {}
+    for product in data.get("products") or []:
+        if not isinstance(product, dict):
+            continue
         variant = product.get("default_variant") or {}
         if not isinstance(variant, dict):
             continue
@@ -288,8 +407,10 @@ def collect(items):
             result = pick_best(item, candidates) or {}
             price = result.get("price")
             qty, unit = parse_weight(result.get("title"))
-            # قیمت هر گرم به ریال (قیمت تومان × ۱۰ ÷ مقدار)
-            per_unit = round(price * 10 / qty, 1) if price and qty else None
+            # قیمت هر کیلو/لیتر به تومان (قیمت ÷ مقدار به گرم/میلی‌لیتر × ۱۰۰۰)؛
+            # برای تطابق تقریبی خالی می‌ماند چون ممکن است محصول دیگری باشد
+            exact = result.get("match") == "دقیق"
+            per_unit = round(price * 1000 / qty) if price and qty and exact else None
             rows.append({
                 "item": item,
                 "title": result.get("title") or "",
@@ -303,7 +424,7 @@ def collect(items):
             })
             label = f"{price:,} تومان" if price else "پیدا نشد"
             if per_unit:
-                label += f"  |  {qty:g} {unit}  |  هر {unit} {per_unit:,} ریال"
+                label += f"  |  {qty:g} {unit}  |  هر {PER_UNIT_LABEL[unit]} {per_unit:,} تومان"
             if result.get("match"):
                 label += f"  |  {result['title']}  [{result['match']}]"
             print(f"{item:<15} {site:<15} {label}")
@@ -313,6 +434,8 @@ def collect(items):
     return rows
 
 
+PER_UNIT_LABEL = {"گرم": "کیلو", "میلی‌لیتر": "لیتر"}
+
 COLUMNS = [
     ("نام ماده", 20),
     ("نام محصول", 45),
@@ -320,7 +443,7 @@ COLUMNS = [
     ("مقدار", 10),
     ("واحد", 11),
     ("قیمت (تومان)", 15),
-    ("قیمت هر گرم/میلی‌لیتر (ریال)", 26),
+    ("قیمت هر کیلو/لیتر (تومان)", 26),
     ("سایت", 15),
     ("لینک محصول", 50),
 ]
@@ -356,7 +479,7 @@ def save_excel(rows, path):
         if row["price"]:
             ws.cell(row=r, column=6).number_format = "#,##0"
         if row["per_unit"]:
-            ws.cell(row=r, column=7).number_format = "#,##0.0"
+            ws.cell(row=r, column=7).number_format = "#,##0"
         if row["match"].startswith("تقریبی"):
             ws.cell(row=r, column=3).fill = PatternFill("solid", fgColor="FFF2CC")
         if row["url"]:
