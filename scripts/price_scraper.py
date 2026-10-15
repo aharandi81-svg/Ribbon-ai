@@ -153,7 +153,7 @@ def main():
 
     items = list(args.items)
     if args.file:
-        with open(args.file, encoding="utf-8") as fh:
+        with open(args.file, encoding="utf-8-sig") as fh:
             items += [line.strip() for line in fh if line.strip()]
     if not items:
         items = DEFAULT_ITEMS
