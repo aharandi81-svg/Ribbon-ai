@@ -5,6 +5,7 @@
     python price_scraper.py                       # لیست پیش‌فرض داخل اسکریپت
     python price_scraper.py آرد شکر "روغن مایع"    # لیست از خط فرمان
     python price_scraper.py -f items.txt -o out.xlsx
+    python price_scraper.py --debug شکر            # پاسخ خام سایت‌ها در پوشه debug_raw
 
 بدون مرورگر؛ فقط requests + BeautifulSoup + openpyxl.
 
@@ -14,6 +15,7 @@
 """
 
 import argparse
+import os
 import re
 import time
 from urllib.parse import urljoin
@@ -40,25 +42,57 @@ PERSIAN_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "0123
 session = requests.Session()
 session.headers.update(HEADERS)
 
+# با --debug پاسخ خام سایت‌ها برای اولین ماده در این پوشه ذخیره می‌شود
+DEBUG_DIR = None
+DEBUG_SAVED = set()
 
-# عدد با جداکننده هزارگان (, ٬ ،) و اعشار اختیاری (. ٫)
-PRICE_NUMBER_RE = re.compile(r"\d{1,3}(?:[,٬،]\d{3})+(?:[.٫]\d+)?|\d+(?:[.٫]\d+)?")
+
+def debug_save(name, text):
+    """اگر --debug فعال است، text را (فقط بار اول برای هر name) در DEBUG_DIR/name ذخیره کن."""
+    if not DEBUG_DIR or name in DEBUG_SAVED:
+        return
+    os.makedirs(DEBUG_DIR, exist_ok=True)
+    with open(os.path.join(DEBUG_DIR, name), "w", encoding="utf-8") as fh:
+        fh.write(text)
+    DEBUG_SAVED.add(name)
+    print(f"[debug] {os.path.join(DEBUG_DIR, name)} ذخیره شد.")
+
+
+def debug_fetch(name, url, **kwargs):
+    """در حالت --debug صفحه/پاسخ url را بگیر و ذخیره کن؛ خطا اجرای اصلی را قطع نکند."""
+    if not DEBUG_DIR or name in DEBUG_SAVED or not url:
+        return
+    try:
+        resp = session.get(url, timeout=TIMEOUT, **kwargs)
+        debug_save(name, f"<!-- {resp.status_code} {resp.url} -->\n{resp.text}")
+    except requests.RequestException as exc:
+        print(f"[debug] {url}: {exc}")
+
+
+# عدد با جداکننده هزارگان (, ٬ ،) و اعشار اختیاری (. ٫)؛ یا هزارگان با نقطه (1.250.000)
+DOT_THOUSANDS_RE = re.compile(r"\d{1,3}(?:[.٫]\d{3})+")
+PRICE_NUMBER_RE = re.compile(
+    r"\d{1,3}(?:[,٬،]\d{3})+(?:[.٫]\d+)?|" + DOT_THOUSANDS_RE.pattern + r"(?!\d)|\d+(?:[.٫]\d+)?"
+)
+MIN_PRICE = 1000  # قیمت کمتر از ۱۰۰۰ تومان قطعاً اشتباه خوانده شده
 
 
 def to_int_price(text):
     """
     '۱۲۵,۰۰۰ تومان' -> 125000 ؛ اگر عددی نبود None.
     فقط اولین عدد (غیر از درصد تخفیف) خوانده می‌شود و اعشار دور ریخته می‌شود:
-    '۲۰٪ ۱۲۵,۰۰۰ تومان' -> 125000 ؛ '۱۲۵٬۰۰۰٫۰۰' -> 125000.
+    '۲۰٪ ۱۲۵,۰۰۰ تومان' -> 125000 ؛ '۱۲۵٬۰۰۰٫۰۰' -> 125000 ؛ '1.250.000' -> 1250000.
     """
     if not text:
         return None
     text = text.translate(PERSIAN_DIGITS)
     for match in PRICE_NUMBER_RE.finditer(text):
-        if re.match(r"\s*[%٪]", text[match.end():]):
+        if re.match(r"\s*(?:[%٪]|درصد)", text[match.end():]):
             continue  # درصد تخفیف
-        integer = re.split(r"[.٫]", match.group())[0]
-        return int(re.sub(r"\D", "", integer))
+        number = match.group()
+        if not DOT_THOUSANDS_RE.fullmatch(number):
+            number = re.split(r"[.٫]", number)[0]  # اعشار
+        return int(re.sub(r"\D", "", number))
     return None
 
 
@@ -114,9 +148,10 @@ NOISE_WORDS = {
     "ای", "وزن", "حجم", "مقدار", "حدود", "تقریبی", "g", "gr", "kg", "ml", "cc", "x",
 }
 WORD_SUFFIXES = ("", "ی", "ای", "یی", "ها", "های", "هایی")
-# اگر این کلمات در عنوان باشند ولی در نام ماده نه، محصول چیز دیگری است
-# (کرفس ≠ دانه کرفس، پیاز ≠ پودر پیاز)
-NEGATIVE_WORDS = {"پودر", "دانه", "چیپس", "طعم", "اسانس", "عصاره", "پفک", "سس"}
+# اگر این کلمات در عنوان باشند ولی در نام ماده نه، احتمالاً محصول چیز دیگری است
+# (گوجه فرنگی ≠ سس گوجه فرنگی، سیب زمینی ≠ چیپس سیب زمینی)؛ رد نمی‌شود، فقط رتبه‌اش بدتر می‌شود.
+# «پودر» و «دانه» عمداً نیستند: «پودر زردچوبه» و «فلفل سیاه دانه» همان ادویه‌اند.
+NEGATIVE_WORDS = {"چیپس", "طعم", "اسانس", "عصاره", "پفک", "سس"}
 
 
 def normalize(text):
@@ -137,15 +172,16 @@ def word_matches(query_word, title_word):
 def match_score(query, title):
     """
     None اگر همه کلمات نام ماده در عنوان محصول نباشد.
-    در غیر این صورت هرچه کمتر، بهتر: (پشت‌سرهم نیامدن، تعداد کلمات اضافه).
+    در غیر این صورت هرچه کمتر، بهتر: (تعداد کلمات منفی، پشت‌سرهم نیامدن، تعداد کلمات اضافه، اضافه‌ها، منفی‌ها).
     مثلاً برای «آرد»، «آرد ۱ کیلویی» از «آرد تمپورا» بهتر است.
     """
     q_words, t_words = normalize(query), normalize(title)
     if not q_words:
         return None
-    for neg in NEGATIVE_WORDS:
-        if not any(word_matches(neg, qw) for qw in q_words) and any(word_matches(neg, tw) for tw in t_words):
-            return None
+    negatives = [
+        neg for neg in sorted(NEGATIVE_WORDS)
+        if not any(word_matches(neg, qw) for qw in q_words) and any(word_matches(neg, tw) for tw in t_words)
+    ]
     positions = []
     for qw in q_words:
         hits = [i for i, tw in enumerate(t_words) if word_matches(qw, tw) and i not in positions]
@@ -157,24 +193,32 @@ def match_score(query, title):
         tw for i, tw in enumerate(t_words)
         if i not in positions and tw not in NOISE_WORDS and not re.fullmatch(r"[\d/.]+[a-z]*", tw)
     ]
-    return (0 if contiguous else 1, len(extras), extras)
+    return (len(negatives), 0 if contiguous else 1, len(extras), extras, negatives)
 
 
 def pick_best(query, candidates):
     """
     بهترین محصول از نظر تطابق نام؛ در تساوی، ترتیب خود سایت حفظ می‌شود.
-    به محصول انتخاب‌شده کلید "match" اضافه می‌شود: «دقیق» یا «تقریبی (اضافه: ...)».
+    به محصول انتخاب‌شده کلید "match" اضافه می‌شود:
+      «دقیق»                 همه کلمات پشت‌سرهم، بدون کلمه اضافه
+      «دقیق (اضافه: لادن)»   همه کلمات پشت‌سرهم، فقط برند/صفت اضافه دارد
+      «تقریبی (...)»          ترتیب کلمات فرق دارد یا کلمه منفی (سس، چیپس، ...) دارد
+    و کلید "comparable": آیا قیمت هر کیلو برایش معنادار است (هر حالتی جز «تقریبی»).
     """
     scored = [(match_score(query, c["title"]), i, c) for i, c in enumerate(candidates)]
     scored = [s for s in scored if s[0] is not None]
     if not scored:
         return None
-    (gap, _, extras), _, best = min(scored, key=lambda s: (s[0][:2], s[1]))
-    if not gap and not extras:
-        match = "دقیق"
+    (negatives, gap, _, extras, neg_words), _, best = min(scored, key=lambda s: (s[0][:3], s[1]))
+    if negatives:
+        match = f"تقریبی (کلمه منفی: {' '.join(neg_words)})"
+    elif gap:
+        match = "تقریبی (ترتیب کلمات فرق دارد)"
+    elif extras:
+        match = f"دقیق (اضافه: {' '.join(extras)})"
     else:
-        match = "تقریبی" + (f" (اضافه: {' '.join(extras)})" if extras else " (ترتیب کلمات فرق دارد)")
-    return {**best, "match": match}
+        match = "دقیق"
+    return {**best, "match": match, "comparable": not negatives and not gap}
 
 
 # ---------------------------------------------------------------- parsehshop
@@ -210,23 +254,28 @@ def price_to_toman(text, currency=None):
     return price
 
 
+def valid_price(price, title=""):
+    """قیمت زیر MIN_PRICE تومان (مثلاً ۹۹ به‌جای ۹۹٬۰۰۰) کنار گذاشته می‌شود و هشدار چاپ می‌شود."""
+    if price and price < MIN_PRICE:
+        print(f"[هشدار] قیمت {price} تومان برای «{title}» نامعتبر است (کمتر از {MIN_PRICE:,}) و نادیده گرفته شد.")
+        return None
+    return price or None
+
+
 def is_truthy_flag(value):
     return value not in (False, 0, "0", "", None)
 
 
 def parseh_json_available(product):
-    """کالای ناموجود پرستاشاپ: availability=unavailable یا available_for_order=0 یا موجودی صفر."""
-    if str(product.get("availability") or "").lower() == "unavailable":
-        return False
-    if "available_for_order" in product and not is_truthy_flag(product["available_for_order"]):
-        return False
-    quantity = product.get("quantity")
-    if quantity is not None and not is_truthy_flag(product.get("allow_oosp")):
-        try:
-            if int(float(quantity)) <= 0:
-                return False
-        except (TypeError, ValueError):
-            pass
+    """
+    کالای ناموجود پرستاشاپ. اگر فیلد availability هست فقط به آن تکیه می‌شود
+    (در فروشگاهی که مدیریت موجودی خاموش است quantity همیشه ۰ است)؛
+    وگرنه available_for_order. quantity عمداً بررسی نمی‌شود.
+    """
+    if product.get("availability"):
+        return str(product["availability"]).lower() != "unavailable"
+    if "available_for_order" in product:
+        return is_truthy_flag(product["available_for_order"])
     return True
 
 
@@ -252,6 +301,7 @@ def parse_parseh_json(data):
             price = int(amount) // 10 if currency == "rial" else int(amount)
         else:
             price = price_to_toman(formatted, currency)
+        price = valid_price(price, product.get("name"))
         if price:
             candidates.append({
                 "title": " ".join(BeautifulSoup(product.get("name") or "", "html.parser").get_text(" ").split()),
@@ -287,10 +337,10 @@ def parse_parseh_html(html, base_url=PARSEH_SEARCH):
             continue
         currency = detect_currency(price_el.get_text(), price_el.parent.get_text() if price_el.parent else "") \
             or page_currency
-        price = price_to_toman(price_el.get_text(), currency)
+        link = first_match(card, ".product-title a", "a.product-name", "h3 a", "h2 a", "a[href]")
+        price = valid_price(price_to_toman(price_el.get_text(), currency), link.get_text(strip=True) if link else "")
         if not price:
             continue  # بدون قیمت
-        link = first_match(card, ".product-title a", "a.product-name", "h3 a", "h2 a", "a[href]")
         url = urljoin(base_url, link["href"]) if link and link.get("href") else ""
         if url in seen:  # کارت‌های تودرتو (article + .product-container) تکراری نشوند
             continue
@@ -331,17 +381,23 @@ def search_parsehshop(query):
         timeout=TIMEOUT,
     )
     resp.raise_for_status()
+    debug_save("parseh_search.json", resp.text)
     try:
         candidates = parse_parseh_json(resp.json())
     except ValueError:
         candidates = []
     if candidates:
+        debug_fetch("parseh_search.html", PARSEH_SEARCH, params=params)
+        debug_fetch("parseh_product.html", candidates[0]["url"])
         return candidates
 
     # ۲) HTML
     resp = session.get(PARSEH_SEARCH, params=params, timeout=TIMEOUT)
     resp.raise_for_status()
+    debug_save("parseh_search.html", resp.text)
     candidates = parse_parseh_html(resp.text, resp.url)
+    if candidates:
+        debug_fetch("parseh_product.html", candidates[0]["url"])
 
     if not candidates:
         with open(PARSEH_DEBUG_FILE, "w", encoding="utf-8") as fh:
@@ -364,7 +420,13 @@ def search_digikala(query):
         timeout=TIMEOUT,
     )
     resp.raise_for_status()
-    return parse_digikala_json(resp.json())
+    debug_save("digikala_search.json", resp.text)
+    candidates = parse_digikala_json(resp.json())
+    if candidates:
+        dkp = re.search(r"dkp-(\d+)", candidates[0]["url"])
+        if dkp:
+            debug_fetch("digikala_product.json", f"https://api.digikala.com/v2/product/{dkp.group(1)}/")
+    return candidates
 
 
 def parse_digikala_json(data):
@@ -378,12 +440,13 @@ def parse_digikala_json(data):
         if not isinstance(variant, dict):
             continue
         price = (variant.get("price") or {}).get("selling_price")
+        price = valid_price(int(price) // 10, product.get("title_fa")) if price else None
         if not price:
             continue
         uri = (product.get("url") or {}).get("uri") or f"/product/dkp-{product.get('id')}/"
         candidates.append({
             "title": product.get("title_fa") or "",
-            "price": int(price) // 10,
+            "price": price,
             "url": urljoin("https://www.digikala.com", uri),
         })
     return candidates
@@ -409,8 +472,7 @@ def collect(items):
             qty, unit = parse_weight(result.get("title"))
             # قیمت هر کیلو/لیتر به تومان (قیمت ÷ مقدار به گرم/میلی‌لیتر × ۱۰۰۰)؛
             # برای تطابق تقریبی خالی می‌ماند چون ممکن است محصول دیگری باشد
-            exact = result.get("match") == "دقیق"
-            per_unit = round(price * 1000 / qty) if price and qty and exact else None
+            per_unit = round(price * 1000 / qty) if price and qty and result.get("comparable") else None
             rows.append({
                 "item": item,
                 "title": result.get("title") or "",
@@ -495,7 +557,13 @@ def main():
     parser.add_argument("items", nargs="*", help="نام مواد اولیه")
     parser.add_argument("-f", "--file", help="فایل متنی؛ هر خط یک ماده")
     parser.add_argument("-o", "--output", default="prices.xlsx", help="فایل اکسل خروجی")
+    parser.add_argument(
+        "--debug", nargs="?", const="debug_raw", metavar="DIR",
+        help="پاسخ خام JSON/HTML سایت‌ها برای اولین ماده را در این پوشه ذخیره کن (پیش‌فرض debug_raw)",
+    )
     args = parser.parse_args()
+    global DEBUG_DIR
+    DEBUG_DIR = args.debug
 
     items = list(args.items)
     if args.file:

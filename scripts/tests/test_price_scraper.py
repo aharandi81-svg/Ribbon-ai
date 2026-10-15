@@ -23,6 +23,10 @@ import price_scraper as ps  # noqa: E402
     ("125,000.00 تومان", 125000),
     ("١٢٥٬٠٠٠ تومان", 125000),                  # ارقام عربی
     ("125000", 125000),
+    ("تخفیف ۲۰ درصد ۱۲۵,۰۰۰", 125000),        # «درصد» هم رد شود
+    ("۹۹٫۰۰۰ تومان", 99000),                   # هزارگان با ممیز فارسی
+    ("1.250.000 ریال", 1250000),               # هزارگان با نقطه
+    ("12.50", 12),
     ("ناموجود", None),
     ("", None),
     (None, None),
@@ -67,21 +71,44 @@ def test_parse_weight(title, expected):
 
 # ---------------------------------------------------------------- name matching (۵)
 @pytest.mark.parametrize("query, title", [
-    ("کرفس", "دانه کرفس ۱۰۰ گرمی"),
-    ("پیاز", "پودر پیاز ۸۰ گرمی"),
+    ("زردچوبه", "پودر زردچوبه ۹۰ گرمی"),
+    ("دارچین", "دارچین پودر شده"),
+    ("فلفل سیاه", "فلفل سیاه دانه"),
+    ("سیر", "سیر پودر شده"),
+    ("شکر", "شکر سفید ۹۰۰ گرمی"),
+    ("روغن مایع", "روغن مایع لادن"),
+    ("برنج ایرانی", "برنج ایرانی هاشمی"),
+])
+def test_spices_and_brands_are_comparable(query, title):
+    best = ps.pick_best(query, [{"title": title, "price": 1, "url": "u"}])
+    assert best is not None and best["comparable"] and best["match"].startswith("دقیق")
+
+
+@pytest.mark.parametrize("query, title", [
+    ("گوجه فرنگی", "سس گوجه فرنگی"),
     ("سیب زمینی", "چیپس سیب زمینی"),
     ("لیمو", "اسانس لیمو"),
+    ("ایرانی برنج", "برنج ایرانی"),               # ترتیب کلمات فرق دارد
 ])
-def test_negative_words_reject(query, title):
-    assert ps.match_score(query, title) is None
+def test_negative_or_gap_is_approximate(query, title):
+    best = ps.pick_best(query, [{"title": title, "price": 1, "url": "u"}])
+    assert best["match"].startswith("تقریبی") and not best["comparable"]
+
+
+def test_negative_word_ranks_lower_not_rejected():
+    best = ps.pick_best("گوجه فرنگی", [
+        {"title": "سس گوجه فرنگی", "price": 1, "url": "a"},
+        {"title": "گوجه فرنگی گلخانه ای ممتاز", "price": 2, "url": "b"},
+    ])
+    assert best["url"] == "b"
 
 
 def test_negative_word_in_query_is_allowed():
-    assert ps.match_score("پودر پیاز", "پودر پیاز ۸۰ گرمی") is not None
-    assert ps.match_score("بکینگ پودر", "بکینگ پودر ۵۰۰ گرمی") is not None
+    best = ps.pick_best("سس مایونز", [{"title": "سس مایونز ۴۵۰ گرمی", "price": 1, "url": "u"}])
+    assert best["match"] == "دقیق" and best["comparable"]
 
 
-def test_pick_best_prefers_exact():
+def test_pick_best_prefers_fewer_extras():
     best = ps.pick_best("کرفس", [
         {"title": "دانه کرفس ۱۰۰ گرمی", "price": 1, "url": "a"},
         {"title": "کرفس ۵۰۰ گرمی", "price": 2, "url": "b"},
@@ -89,14 +116,14 @@ def test_pick_best_prefers_exact():
     assert best["url"] == "b" and best["match"] == "دقیق"
 
 
-def test_collect_leaves_per_unit_empty_for_approximate(monkeypatch):
+def test_collect_per_unit(monkeypatch):
     monkeypatch.setattr(ps, "DELAY", 0)
     monkeypatch.setattr(ps, "SITES", {
-        "exact": lambda q: [{"title": "شکر ۹۰۰ گرمی", "price": 90000, "url": "u1"}],
-        "approx": lambda q: [{"title": "شکر قهوه‌ای ۵۰۰ گرمی", "price": 50000, "url": "u2"}],
+        "brand": lambda q: [{"title": "شکر سفید ۹۰۰ گرمی", "price": 90000, "url": "u1"}],
+        "approx": lambda q: [{"title": "سس شکر ۵۰۰ گرمی", "price": 50000, "url": "u2"}],
     })
-    exact, approx = ps.collect(["شکر"])
-    assert exact["per_unit"] == 100000              # تومان به ازای هر کیلو (۷)
+    brand, approx = ps.collect(["شکر"])
+    assert brand["per_unit"] == 100000              # تومان به ازای هر کیلو (۷)
     assert approx["match"].startswith("تقریبی") and approx["per_unit"] is None
     assert approx["price"] == 50000
 
@@ -119,13 +146,22 @@ def test_parseh_json_explicit_currency_field():
 
 def test_parseh_json_skips_unavailable():
     data = {"products": [
-        {"name": "a", "price_amount": 1000, "availability": "unavailable"},
-        {"name": "b", "price_amount": 1000, "available_for_order": "0"},
-        {"name": "c", "price_amount": 1000, "quantity": 0},
-        {"name": "d", "price_amount": 1000, "quantity": 0, "allow_oosp": 1},
-        {"name": "e", "price_amount": 1000, "quantity": 5, "available_for_order": 1},
+        {"name": "a", "price_amount": 10000, "availability": "unavailable"},
+        {"name": "b", "price_amount": 10000, "available_for_order": "0"},
+        # مدیریت موجودی خاموش: quantity=0 ولی availability=available -> موجود
+        {"name": "c", "price_amount": 10000, "availability": "available", "quantity": 0, "allow_oosp": 0},
+        {"name": "d", "price_amount": 10000, "quantity": 0},
+        {"name": "e", "price_amount": 10000, "availability": "last_remaining_items", "available_for_order": 0},
     ]}
-    assert [c["title"] for c in ps.parse_parseh_json(data)] == ["d", "e"]
+    assert [c["title"] for c in ps.parse_parseh_json(data)] == ["c", "d", "e"]
+
+
+def test_min_price_rejected():
+    data = {"products": [{"name": "a", "price": "۹۹ تومان", "url": "u"},
+                         {"name": "b", "price_amount": 500, "url": "u"}]}
+    assert ps.parse_parseh_json(data) == []
+    dk = {"data": {"products": [{"id": 1, "title_fa": "x", "default_variant": {"price": {"selling_price": 9000}}}]}}
+    assert ps.parse_digikala_json(dk) == []
 
 
 @pytest.mark.parametrize("data", [None, [], {}, {"products": None}])
@@ -157,6 +193,12 @@ def test_parseh_html_discount_currency_and_stock():
     assert rows == [{"title": "شکر ۹۰۰ گرمی", "price": 90000, "url": "https://parsehshop.ir/p/1-sugar.html"}]
 
 
+def test_parseh_html_in_stock_without_flags():
+    html = """<article class="product-miniature"><h3 class="product-title"><a href="/x">قند</a></h3>
+    <span class="price">۱۲۵,۰۰۰ تومان</span></article>"""
+    assert len(ps.parse_parseh_html(html)) == 1
+
+
 def test_parseh_html_toman_text():
     html = """<article class="product-miniature"><h3 class="product-title"><a href="/x">قند</a></h3>
     <span class="price">۲۰٪ ۱۲۵,۰۰۰ تومان</span></article>"""
@@ -178,3 +220,49 @@ def test_digikala_rial_to_toman():
     assert ps.parse_digikala_json(data) == [
         {"title": "شکر", "price": 125000, "url": "https://www.digikala.com/product/dkp-1/"}
     ]
+
+
+# ---------------------------------------------------------------- --debug (۵)
+class FakeResp:
+    def __init__(self, text, url="https://x/"):
+        self.text, self.url, self.status_code = text, url, 200
+
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        import json
+        return json.loads(self.text)
+
+
+def test_debug_saves_raw_responses(tmp_path, monkeypatch):
+    import json
+    search = json.dumps({"products": [{"name": "شکر", "price_amount": 90000, "url": "https://parsehshop.ir/p/1"}]})
+    dk = json.dumps({"data": {"products": [{"id": 7, "title_fa": "شکر",
+                                            "default_variant": {"price": {"selling_price": 900000}}}]}})
+    pages = {"https://parsehshop.ir/p/1": "<html>product</html>",
+             "https://api.digikala.com/v1/search/": dk,
+             "https://api.digikala.com/v2/product/7/": "{\"product\": 7}"}
+
+    def fake_get(url, params=None, **kwargs):
+        if url == ps.PARSEH_SEARCH:
+            return FakeResp(search if (params or {}).get("ajax") else "<html>search</html>", url)
+        return FakeResp(pages[url], url)
+
+    monkeypatch.setattr(ps.session, "get", fake_get)
+    monkeypatch.setattr(ps, "DEBUG_DIR", str(tmp_path))
+    monkeypatch.setattr(ps, "DEBUG_SAVED", set())
+    ps.search_parsehshop("شکر")
+    ps.search_digikala("شکر")
+    assert sorted(os.listdir(tmp_path)) == [
+        "digikala_product.json", "digikala_search.json",
+        "parseh_product.html", "parseh_search.html", "parseh_search.json",
+    ]
+    assert (tmp_path / "parseh_search.json").read_text(encoding="utf-8") == search
+
+
+def test_debug_off_saves_nothing(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(ps, "DEBUG_DIR", None)
+    ps.debug_save("x.json", "{}")
+    assert os.listdir(tmp_path) == []
