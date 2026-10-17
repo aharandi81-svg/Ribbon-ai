@@ -4,6 +4,9 @@
 استفاده:
     python divar_cars.py --serve          # جمع‌آوری + باز شدن نمایشگر در مرورگر (حالت run_divar_cars.bat)
     python divar_cars.py --view-only      # فقط نمایش نتایج قبلی (حالت view_cars.bat)
+    python divar_cars.py --lan --password 1234 --every-hours 6
+                                          # سرور شبکه: همه کامپیوترهای شبکه نمایشگر را می‌بینند،
+                                          # هر ۶ ساعت آگهی‌های جدید اضافه می‌شود (حالت run_divar_server.bat)
     python divar_cars.py                  # فقط جمع‌آوری
     python divar_cars.py --min-rial 8000000000 --max-rial 15000000000
     python divar_cars.py --limit 30       # توقف بعد از ۳۰ آگهی جدید (پیش‌فرض: بدون محدودیت)
@@ -19,17 +22,20 @@
 """
 
 import argparse
+import base64
 import csv
-import functools
+import hmac
 import io
 import json
 import os
 import re
+import socket
 import threading
 import time
 import webbrowser
-from datetime import datetime
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from datetime import datetime, timedelta
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 import requests
 from bs4 import BeautifulSoup
@@ -357,20 +363,78 @@ class CsvStore:
 
 
 # ---------------------------------------------------------------- نمایشگر
-class QuietHandler(SimpleHTTPRequestHandler):
-    def end_headers(self):
+class ViewerHandler(BaseHTTPRequestHandler):
+    """
+    فقط دو فایل سرو می‌شود: صفحه نمایشگر و CSV (نه کل پوشه)، چون در حالت شبکه
+    کامپیوترهای دیگر هم به آن دسترسی دارند. اگر رمز تنظیم شده باشد، ورود لازم است.
+    """
+    files = {}      # مسیر URL -> (مسیر فایل، content-type)
+    password = None
+
+    def do_GET(self):
+        if self.password and not self._authorized():
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="divar", charset="UTF-8"')
+            self.end_headers()
+            return
+        path = urlsplit(self.path).path
+        if path == "/":
+            self.send_response(302)
+            self.send_header("Location", "/" + VIEWER_NAME)
+            self.end_headers()
+            return
+        if path not in self.files:
+            self.send_error(404)
+            return
+        file_path, content_type = self.files[path]
+        try:
+            with open(file_path, "rb") as fh:
+                body = fh.read()
+        except FileNotFoundError:
+            self.send_error(404)
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")  # همیشه آخرین نسخه CSV
-        super().end_headers()
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _authorized(self):
+        header = self.headers.get("Authorization", "")
+        if not header.startswith("Basic "):
+            return False
+        try:
+            _, _, given = base64.b64decode(header[6:]).partition(b":")
+        except ValueError:
+            return False
+        # مقایسه بایت‌ها (رمز فارسی هم کار می‌کند؛ مرورگرها رمز را UTF-8 می‌فرستند)
+        return hmac.compare_digest(given, self.password.encode("utf-8"))
 
     def log_message(self, *args):
         pass
 
 
-def start_viewer():
-    handler = functools.partial(QuietHandler, directory=HERE)
+def lan_ip():
+    """IP این کامپیوتر در شبکه داخلی (بسته‌ای واقعاً ارسال نمی‌شود)."""
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        try:
+            s.connect(("10.255.255.255", 1))
+            return s.getsockname()[0]
+        except OSError:
+            return socket.gethostbyname(socket.gethostname())
+
+
+def start_viewer(csv_path, lan=False, password=None):
+    ViewerHandler.files = {
+        "/" + VIEWER_NAME: (os.path.join(HERE, VIEWER_NAME), "text/html; charset=utf-8"),
+        "/" + CSV_NAME: (csv_path, "text/csv; charset=utf-8"),
+    }
+    ViewerHandler.password = password
+    host = "0.0.0.0" if lan else "127.0.0.1"
     for port in range(PORT, PORT + 20):
         try:
-            server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+            server = ThreadingHTTPServer((host, port), ViewerHandler)
             break
         except OSError:
             continue
@@ -378,43 +442,31 @@ def start_viewer():
         print("[پورت آزاد برای نمایشگر پیدا نشد]")
         return None
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    url = f"http://127.0.0.1:{port}/{VIEWER_NAME}"
-    print(f"نمایشگر: {url}")
-    webbrowser.open(url)
+    local_url = f"http://127.0.0.1:{port}/{VIEWER_NAME}"
+    print(f"نمایشگر روی همین کامپیوتر: {local_url}")
+    if lan:
+        print("=" * 60)
+        print(f"  آدرس برای بقیه کامپیوترهای شبکه:  http://{lan_ip()}:{port}")
+        print("  (اگر ویندوز پیام فایروال داد، «Allow access» را بزنید)")
+        print(f"  رمز ورود: {'فعال' if password else 'ندارد — هر کسی در شبکه می‌تواند ببیند'}")
+        print("=" * 60)
+    webbrowser.open(local_url)
     return server
 
 
 def wait_for_exit():
     try:
-        input("\nنمایشگر هنوز باز است. برای بستن Enter بزنید...")
+        input("\nنمایشگر هنوز باز است. برای بستن Enter بزنید (یا پنجره را ببندید)...")
     except (EOFError, KeyboardInterrupt):
         pass
 
 
 # ---------------------------------------------------------------- اجرا
-def main():
-    parser = argparse.ArgumentParser(description="خودروهای دیوار تهران در بازه قیمت -> CSV")
-    parser.add_argument("--min-rial", type=int, default=5_000_000_000, help="کف قیمت به ریال")
-    parser.add_argument("--max-rial", type=int, default=20_000_000_000, help="سقف قیمت به ریال")
-    parser.add_argument("--limit", type=int, default=0, help="توقف بعد از این تعداد آگهی جدید (۰ یعنی بدون محدودیت)")
-    parser.add_argument("--max-pages", type=int, default=200, help="حداکثر صفحات لیست (هر صفحه حدود ۲۰ آگهی)")
-    parser.add_argument("--no-details", action="store_true", help="جزئیات و توضیحات خوانده نشود (سریع‌تر)")
-    parser.add_argument("--serve", action="store_true", help="نمایشگر HTML را هم باز کن")
-    parser.add_argument("--view-only", action="store_true", help="فقط نمایشگر؛ بدون جمع‌آوری")
-    parser.add_argument("-o", "--output", default=os.path.join(HERE, CSV_NAME), help="فایل CSV")
-    args = parser.parse_args()
-
-    if args.view_only:
-        if start_viewer():
-            wait_for_exit()
-        return
-
+def scrape(args, store):
+    """یک دور جمع‌آوری؛ هر آگهی جدید همان لحظه در CSV نوشته می‌شود."""
     min_toman, max_toman = args.min_rial // 10, args.max_rial // 10
-    store = CsvStore(args.output)
-    print(f"بازه قیمت: {args.min_rial:,} تا {args.max_rial:,} ریال | "
+    print(f"\n[{datetime.now():%Y-%m-%d %H:%M}] بازه قیمت: {args.min_rial:,} تا {args.max_rial:,} ریال | "
           f"{len(store.tokens)} آگهی از قبل در CSV هست")
-    server = start_viewer() if args.serve else None
-
     added = skipped = 0
     try:
         for post in iter_posts(min_toman, max_toman, args.max_pages):
@@ -434,20 +486,59 @@ def main():
                 break
             if not args.no_details:
                 time.sleep(DELAY)
-    except KeyboardInterrupt:
-        print("\nمتوقف شد (Ctrl+C). آگهی‌های تا اینجا ذخیره شده‌اند.")
     except (requests.RequestException, ValueError) as exc:
         print(f"\n[خطا هنگام خواندن صفحه بعدی: {exc}] — آگهی‌های تا اینجا ذخیره شده‌اند.")
-
-    if not store.flush():
-        fallback = args.output.replace(".csv", "-pending.csv")
-        with open(fallback, "w", encoding="utf-8-sig", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=COLUMNS)
-            writer.writeheader()
-            writer.writerows(store.pending)
-        print(f"فایل اصلی قفل بود؛ ردیف‌های باقیمانده در {os.path.basename(fallback)} ذخیره شد.")
-
     print(f"\n{added} آگهی جدید اضافه شد، {skipped} آگهی تکراری رد شد. فایل: {args.output}")
+
+
+def save_pending(store, output):
+    if store.flush():
+        return
+    fallback = output.replace(".csv", "-pending.csv")
+    with open(fallback, "w", encoding="utf-8-sig", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=COLUMNS)
+        writer.writeheader()
+        writer.writerows(store.pending)
+    print(f"فایل اصلی قفل بود؛ ردیف‌های باقیمانده در {os.path.basename(fallback)} ذخیره شد.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="خودروهای دیوار تهران در بازه قیمت -> CSV")
+    parser.add_argument("--min-rial", type=int, default=5_000_000_000, help="کف قیمت به ریال")
+    parser.add_argument("--max-rial", type=int, default=20_000_000_000, help="سقف قیمت به ریال")
+    parser.add_argument("--limit", type=int, default=0, help="توقف بعد از این تعداد آگهی جدید (۰ یعنی بدون محدودیت)")
+    parser.add_argument("--max-pages", type=int, default=200, help="حداکثر صفحات لیست (هر صفحه حدود ۲۰ آگهی)")
+    parser.add_argument("--no-details", action="store_true", help="جزئیات و توضیحات خوانده نشود (سریع‌تر)")
+    parser.add_argument("--serve", action="store_true", help="نمایشگر HTML را هم باز کن")
+    parser.add_argument("--view-only", action="store_true", help="فقط نمایشگر؛ بدون جمع‌آوری")
+    parser.add_argument("--lan", action="store_true", help="نمایشگر برای همه کامپیوترهای شبکه داخلی (به‌جای فقط همین کامپیوتر)")
+    parser.add_argument("--password", default=os.environ.get("DIVAR_VIEWER_PASSWORD"),
+                        help="رمز ورود نمایشگر (یا متغیر محیطی DIVAR_VIEWER_PASSWORD)")
+    parser.add_argument("--every-hours", type=float, default=0,
+                        help="جمع‌آوری را هر چند ساعت یک بار تکرار کن (۰ یعنی فقط یک بار)")
+    parser.add_argument("-o", "--output", default=os.path.join(HERE, CSV_NAME), help="فایل CSV")
+    args = parser.parse_args()
+
+    if args.view_only:
+        if start_viewer(args.output, args.lan, args.password):
+            wait_for_exit()
+        return
+
+    store = CsvStore(args.output)
+    server = start_viewer(args.output, args.lan, args.password) if (args.serve or args.lan) else None
+    try:
+        while True:
+            scrape(args, store)
+            save_pending(store, args.output)
+            if not args.every_hours:
+                break
+            next_run = datetime.now() + timedelta(hours=args.every_hours)
+            print(f"دور بعدی جمع‌آوری: {next_run:%H:%M} (برای توقف Ctrl+C یا بستن پنجره)")
+            time.sleep(args.every_hours * 3600)
+    except KeyboardInterrupt:
+        print("\nمتوقف شد (Ctrl+C). آگهی‌های تا اینجا ذخیره شده‌اند.")
+        save_pending(store, args.output)
+        return
     if server:
         wait_for_exit()
 
