@@ -24,3 +24,8 @@ __pycache__/
 *.njsproj
 *.sln
 *.sw?
+
+# scraper outputs
+scripts/divar_cars*.csv
+scripts/*.xlsx
+scripts/parseh_debug.html

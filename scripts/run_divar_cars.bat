@@ -16,7 +16,6 @@ echo Installing required packages...
 %PY% -m pip install --quiet --disable-pip-version-check requests beautifulsoup4 openpyxl
 
 echo.
-%PY% divar_cars.py -o divar_cars.xlsx
-if exist divar_cars.xlsx start "" divar_cars.xlsx
+%PY% divar_cars.py --serve
 echo.
 pause

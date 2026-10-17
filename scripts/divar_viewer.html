@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>خودروهای دیوار تهران</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1d2330; --muted: #6b7280; --border: #e3e6eb;
+    --accent: #2563eb; --accent-soft: #e8efff; --new: #fff6d6; --ok: #16a34a; --warn: #b45309;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1b2029; --text: #e6e9ef; --muted: #9aa3b2; --border: #2c3340;
+      --accent: #6b9bff; --accent-soft: #1f2a44; --new: #3a3420; --ok: #4ade80; --warn: #fbbf24;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: Vazirmatn, "Vazir", Tahoma, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.6;
+  }
+  header {
+    position: sticky; top: 0; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+  }
+  h1 { font-size: 17px; margin: 0; }
+  .status { color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .dot.live { background: var(--ok); animation: pulse 2s infinite; }
+  .dot.err { background: var(--warn); }
+  @keyframes pulse { 50% { opacity: .35; } }
+  .spacer { flex: 1; }
+  main { padding: 16px; max-width: 1500px; margin: 0 auto; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .stat .label { color: var(--muted); font-size: 12px; }
+  .stat .value { font-size: 18px; font-weight: bold; }
+  .filters {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px;
+  }
+  .filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  input, select, button {
+    font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 8px; min-width: 0;
+  }
+  button { cursor: pointer; background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  button:hover { filter: brightness(.97); }
+  .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; vertical-align: top; }
+  th { position: sticky; top: 0; background: var(--panel); font-size: 12px; color: var(--muted); cursor: pointer; white-space: nowrap; user-select: none; }
+  th.sorted { color: var(--accent); }
+  td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.row { cursor: pointer; }
+  tr.row:hover td { background: var(--accent-soft); }
+  tr.new td { background: var(--new); transition: background 3s; }
+  tr.detail td { background: var(--bg); }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 16px; margin-bottom: 8px; }
+  .detail-grid div span { color: var(--muted); }
+  .desc { white-space: pre-wrap; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .empty, .error { padding: 32px 16px; text-align: center; color: var(--muted); }
+  .error { color: var(--warn); }
+  @media (max-width: 600px) { header { padding: 10px 16px; } main { padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚗 خودروهای دیوار تهران</h1>
+  <div class="status"><span id="dot" class="dot"></span><span id="status">در حال بارگذاری…</span></div>
+  <div class="spacer"></div>
+  <label class="status"><input type="checkbox" id="auto" checked> بروزرسانی خودکار (هر ۵ ثانیه)</label>
+  <button id="refresh">بروزرسانی</button>
+</header>
+
+<main>
+  <section class="stats" id="stats"></section>
+
+  <section class="filters">
+    <label>جستجو (عنوان، برند، توضیحات)
+      <input id="q" type="search" placeholder="مثلاً: پژو ۲۰۶">
+    </label>
+    <label>حداقل قیمت (میلیون تومان)<input id="pmin" type="number" min="0" inputmode="numeric"></label>
+    <label>حداکثر قیمت (میلیون تومان)<input id="pmax" type="number" min="0" inputmode="numeric"></label>
+    <label>از سال<input id="ymin" type="number" inputmode="numeric" placeholder="۱۳۹۰"></label>
+    <label>تا سال<input id="ymax" type="number" inputmode="numeric"></label>
+    <label>حداکثر کارکرد (کیلومتر)<input id="kmax" type="number" min="0" inputmode="numeric"></label>
+    <label>گیربکس<select id="gear"><option value="">همه</option></select></label>
+    <label>&nbsp;<button id="reset" type="button">پاک کردن فیلترها</button></label>
+  </section>
+
+  <section class="table-wrap">
+    <table>
+      <thead><tr id="head"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div id="msg" class="empty" hidden></div>
+  </section>
+</main>
+
+<script>
+const CSV_URL = "divar_cars.csv";
+const REFRESH_MS = 5000;
+const COLS = [
+  { key: "عنوان", label: "عنوان", type: "text" },
+  { key: "قیمت (تومان)", label: "قیمت (تومان)", type: "num" },
+  { key: "سال (عدد)", label: "سال", type: "num", plain: true },
+  { key: "کارکرد (کیلومتر)", label: "کارکرد (کیلومتر)", type: "num" },
+  { key: "برند و تیپ", label: "برند و تیپ", type: "text" },
+  { key: "گیربکس", label: "گیربکس", type: "text" },
+  { key: "وضعیت بدنه", label: "بدنه", type: "text" },
+  { key: "زمان و محله", label: "زمان و محله", type: "text" },
+  { key: "زمان ثبت", label: "ثبت در فایل", type: "text" },
+];
+const DETAIL_KEYS = ["رنگ", "نوع سوخت", "وضعیت موتور", "وضعیت شاسی", "بیمه شخص ثالث", "معاوضه", "سال تولید", "کارکرد", "قیمت (ریال)"];
+
+let rows = [], seen = new Set(), firstLoad = true, timer = null;
+let sort = { key: "زمان ثبت", dir: -1 };
+const open = new Set();
+const $ = (id) => document.getElementById(id);
+const fa = (n) => (n === null || n === undefined || n === "" || isNaN(n)) ? "—" : Number(n).toLocaleString("fa-IR");
+const faPlain = (n) => n === null ? "—" : Number(n).toLocaleString("fa-IR", { useGrouping: false });  // سال: بدون ٬
+const faDigitsToEn = (s) => String(s).replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+const num = (v) => { const s = faDigitsToEn(v ?? "").replace(/[^\d.-]/g, ""); return s === "" ? null : Number(s); };
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// CSV پارسر (کوتیشن، ویرگول و خط جدید داخل توضیحات).
+// ردیفی که هنوز با «خط جدید» تمام نشده (در حال نوشته شدن) اضافه نمی‌شود و دفعه بعد می‌آید.
+function parseCSV(text) {
+  text = text.replace(/^﻿/, "");
+  const out = []; let row = [], field = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+      else field += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field); out.push(row); row = []; field = "";
+    } else field += c;
+  }
+  return out;
+}
+
+async function load() {
+  try {
+    const res = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status === 404 ? "هنوز فایل CSV ساخته نشده است." : `خطای ${res.status}`);
+    const table = parseCSV(await res.text());
+    const header = table.shift() || [];
+    const fresh = [];
+    rows = table.filter((r) => r.length === header.length).map((r) => {
+      const o = Object.fromEntries(header.map((h, i) => [h, r[i]]));
+      if (!firstLoad && !seen.has(o.token)) fresh.push(o.token);
+      seen.add(o.token);
+      return o;
+    });
+    firstLoad = false;
+    setStatus(true, `${fa(rows.length)} آگهی · آخرین بروزرسانی ${new Date().toLocaleTimeString("fa-IR")}` +
+      (fresh.length ? ` · ${fa(fresh.length)} آگهی جدید` : ""));
+    fillGearOptions();
+    render(new Set(fresh));
+  } catch (e) {
+    const hint = location.protocol === "file:"
+      ? "این صفحه را مستقیم باز نکنید؛ با run_divar_cars.bat یا view_cars.bat اجرا کنید تا CSV خوانده شود."
+      : e.message;
+    setStatus(false, "خطا در خواندن CSV");
+    if (!rows.length) showMsg(hint, true);
+  }
+}
+
+function setStatus(ok, text) {
+  $("dot").className = "dot " + (ok ? ($("auto").checked ? "live" : "") : "err");
+  $("status").textContent = text;
+}
+function showMsg(text, isError) {
+  const m = $("msg"); m.hidden = !text; m.textContent = text || ""; m.className = isError ? "error" : "empty";
+}
+
+function fillGearOptions() {
+  const sel = $("gear"), current = sel.value;
+  const values = [...new Set(rows.map((r) => r["گیربکس"]).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">همه</option>' + values.map((v) => `<option>${esc(v)}</option>`).join("");
+  sel.value = values.includes(current) ? current : "";
+}
+
+function filtered() {
+  const q = faDigitsToEn($("q").value.trim().toLowerCase());
+  const pmin = num($("pmin").value), pmax = num($("pmax").value);
+  const ymin = num($("ymin").value), ymax = num($("ymax").value), kmax = num($("kmax").value);
+  const gear = $("gear").value;
+  return rows.filter((r) => {
+    const price = num(r["قیمت (تومان)"]), year = num(r["سال (عدد)"]), km = num(r["کارکرد (کیلومتر)"]);
+    if (q && !faDigitsToEn(`${r["عنوان"]} ${r["برند و تیپ"]} ${r["توضیحات"]}`).toLowerCase().includes(q)) return false;
+    if (pmin !== null && (price === null || price < pmin * 1e6)) return false;
+    if (pmax !== null && (price === null || price > pmax * 1e6)) return false;
+    if (ymin !== null && (year === null || year < ymin)) return false;
+    if (ymax !== null && (year === null || year > ymax)) return false;
+    if (kmax !== null && (km === null || km > kmax)) return false;
+    if (gear && r["گیربکس"] !== gear) return false;
+    return true;
+  });
+}
+
+function median(values) {
+  const v = values.filter((x) => x !== null).sort((a, b) => a - b);
+  if (!v.length) return null;
+  const m = Math.floor(v.length / 2);
+  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+}
+
+function renderStats(list) {
+  const prices = list.map((r) => num(r["قیمت (تومان)"]));
+  const valid = prices.filter((p) => p !== null);
+  const avg = valid.length ? valid.reduce((a, b) => a + b, 0) / valid.length : null;
+  const millions = (v) => v === null ? "—" : `${fa(Math.round(v / 1e6))} میلیون`;
+  const stats = [
+    ["تعداد (با فیلتر)", `${fa(list.length)} از ${fa(rows.length)}`],
+    ["میانه قیمت", millions(median(prices))],
+    ["میانگین قیمت", millions(avg)],
+    ["ارزان‌ترین", millions(valid.length ? Math.min(...valid) : null)],
+    ["گران‌ترین", millions(valid.length ? Math.max(...valid) : null)],
+    ["میانه کارکرد", `${fa(median(list.map((r) => num(r["کارکرد (کیلومتر)"]))))} کیلومتر`],
+  ];
+  $("stats").innerHTML = stats.map(([l, v]) => `<div class="stat"><div class="label">${l}</div><div class="value">${v}</div></div>`).join("");
+}
+
+function renderHead() {
+  $("head").innerHTML = COLS.map((c) => {
+    const mark = sort.key === c.key ? (sort.dir > 0 ? " ▲" : " ▼") : "";
+    return `<th data-key="${esc(c.key)}" class="${sort.key === c.key ? "sorted" : ""}">${c.label}${mark}</th>`;
+  }).join("");
+}
+
+function render(fresh = new Set()) {
+  const list = filtered();
+  const col = COLS.find((c) => c.key === sort.key) || COLS[0];
+  list.sort((a, b) => {
+    let x = a[col.key], y = b[col.key];
+    if (col.type === "num") { x = num(x); y = num(y); if (x === null) return 1; if (y === null) return -1; return (x - y) * sort.dir; }
+    return String(x).localeCompare(String(y), "fa") * sort.dir;
+  });
+  renderStats(list);
+  renderHead();
+  $("body").innerHTML = list.map((r) => {
+    const cells = COLS.map((c) => {
+      if (c.key === "عنوان") return `<td><a href="${esc(r["لینک"])}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(r["عنوان"])}</a></td>`;
+      if (c.type === "num") return `<td class="num">${c.plain ? faPlain(num(r[c.key])) : fa(num(r[c.key]))}</td>`;
+      return `<td>${esc(r[c.key]) || "—"}</td>`;
+    }).join("");
+    const main = `<tr class="row${fresh.has(r.token) ? " new" : ""}" data-token="${esc(r.token)}">${cells}</tr>`;
+    if (!open.has(r.token)) return main;
+    let other = {};
+    try { other = r["سایر مشخصات"] ? JSON.parse(r["سایر مشخصات"]) : {}; } catch (e) {}
+    const items = [...DETAIL_KEYS.map((k) => [k, r[k]]), ...Object.entries(other)]
+      .filter(([, v]) => v)
+      .map(([k, v]) => `<div><span>${esc(k)}:</span> ${k === "قیمت (ریال)" ? fa(num(v)) : esc(v)}</div>`).join("");
+    return main + `<tr class="detail"><td colspan="${COLS.length}">
+      <div class="detail-grid">${items}</div>
+      <div class="desc">${esc(r["توضیحات"]) || "بدون توضیحات"}</div>
+      <div><a href="${esc(r["لینک"])}" target="_blank" rel="noopener">مشاهده آگهی در دیوار ←</a></div></td></tr>`;
+  }).join("");
+  showMsg(rows.length && !list.length ? "آگهی‌ای با این فیلترها نیست." : (!rows.length ? "هنوز آگهی‌ای ثبت نشده؛ صفحه خودکار بروز می‌شود." : ""), false);
+  setTimeout(() => document.querySelectorAll("tr.new").forEach((t) => t.classList.remove("new")), 4000);
+}
+
+function schedule() {
+  clearInterval(timer);
+  if ($("auto").checked) timer = setInterval(load, REFRESH_MS);
+  $("dot").classList.toggle("live", $("auto").checked && !$("dot").classList.contains("err"));
+}
+
+$("head").addEventListener("click", (e) => {
+  const th = e.target.closest("th"); if (!th) return;
+  sort = { key: th.dataset.key, dir: sort.key === th.dataset.key ? -sort.dir : 1 };
+  render();
+});
+$("body").addEventListener("click", (e) => {
+  const tr = e.target.closest("tr.row"); if (!tr) return;
+  const t = tr.dataset.token; open.has(t) ? open.delete(t) : open.add(t); render();
+});
+["q", "pmin", "pmax", "ymin", "ymax", "kmax", "gear"].forEach((id) => $(id).addEventListener("input", () => render()));
+$("reset").addEventListener("click", () => {
+  ["q", "pmin", "pmax", "ymin", "ymax", "kmax"].forEach((id) => $(id).value = ""); $("gear").value = ""; render();
+});
+$("refresh").addEventListener("click", load);
+$("auto").addEventListener("change", schedule);
+
+load().then(schedule);
+</script>
+</body>
+</html>

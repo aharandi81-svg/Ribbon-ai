@@ -1,31 +1,38 @@
 """
-آگهی‌های خودروی دیوار تهران با قیمت مشخص و زیر سقف قیمت -> اکسل.
+آگهی‌های خودروی دیوار تهران با قیمت مشخص در بازه قیمت -> CSV + نمایشگر HTML زنده.
 
 استفاده:
-    python divar_cars.py                              # سقف پیش‌فرض: ۲۰٬۰۰۰٬۰۰۰٬۰۰۰ ریال
-    python divar_cars.py --max-rial 15000000000 -o cars.xlsx
-    python divar_cars.py --limit 50                   # ۵۰ آگهی به‌جای ۱۰ تای پیش‌فرض
-    python divar_cars.py --limit 0                    # همه آگهی‌ها (تا --max-pages)
-    python divar_cars.py --max-pages 5 --no-details   # سریع: فقط اطلاعات لیست
+    python divar_cars.py --serve          # جمع‌آوری + باز شدن نمایشگر در مرورگر (حالت run_divar_cars.bat)
+    python divar_cars.py --view-only      # فقط نمایش نتایج قبلی (حالت view_cars.bat)
+    python divar_cars.py                  # فقط جمع‌آوری
+    python divar_cars.py --min-rial 8000000000 --max-rial 15000000000
+    python divar_cars.py --limit 30       # توقف بعد از ۳۰ آگهی جدید (پیش‌فرض: بدون محدودیت)
 
-بدون مرورگر؛ فقط requests + BeautifulSoup + openpyxl.
+بدون مرورگر برای جمع‌آوری؛ فقط requests + BeautifulSoup.
 
 - فقط شهر تهران و دسته «سواری و وانت» (light).
-- آگهی‌های «توافقی» یا بدون قیمت حذف می‌شوند.
-- قیمت‌های دیوار به تومان است؛ سقف به ریال گرفته و تبدیل می‌شود.
-- برای هر آگهی صفحه جزئیاتش هم خوانده می‌شود (کارکرد، مدل، رنگ، گیربکس، بدنه،
-  بیمه، توضیحات و ...) و هر فیلدی که پیدا شود یک ستون اکسل می‌شود.
+- فقط آگهی‌های قیمت‌دار بین ۵٬۰۰۰٬۰۰۰٬۰۰۰ و ۲۰٬۰۰۰٬۰۰۰٬۰۰۰ ریال («توافقی» حذف).
+- هر آگهی به محض پیدا شدن (با جزئیاتش) به divar_cars.csv اضافه می‌شود، پس نمایشگر
+  همان لحظه نتیجه را نشان می‌دهد و اگر وسط کار قطع شود چیزی از دست نمی‌رود.
+- اجرای دوباره آگهی‌هایی را که قبلاً در CSV هست تکرار نمی‌کند و فقط جدیدها را اضافه می‌کند.
+- ستون‌های عددی (قیمت، سال، کارکرد) تمیز ذخیره می‌شوند تا برای رگرسیون قیمت آماده باشند.
 """
 
 import argparse
+import csv
+import functools
+import io
 import json
+import os
 import re
+import threading
 import time
+import webbrowser
+from datetime import datetime
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 import requests
 from bs4 import BeautifulSoup
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
 
 TEHRAN_CITY_ID = "1"
 CATEGORY = "light"  # سواری و وانت
@@ -33,6 +40,11 @@ SEARCH_API = "https://api.divar.ir/v8/postlist/w/search"
 POST_API = "https://api.divar.ir/v8/posts-v2/web/{token}"
 POST_URL = "https://divar.ir/v/{token}"
 LIST_PAGE = "https://divar.ir/s/tehran/car"
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+CSV_NAME = "divar_cars.csv"
+VIEWER_NAME = "divar_viewer.html"
+PORT = 8765
 
 HEADERS = {
     "User-Agent": (
@@ -68,8 +80,28 @@ def price_from_texts(*texts):
     return None
 
 
+def parse_mileage(text):
+    """'۱۲۰٬۰۰۰' یا '۱۲۰ هزار کیلومتر' -> 120000 ؛ 'صفر' / 'کارکرد صفر' -> 0."""
+    if not text:
+        return None
+    text = str(text).translate(PERSIAN_DIGITS)
+    if "صفر" in text and not re.search(r"\d", text):
+        return 0
+    match = re.search(r"\d[\d,٬]*", text)
+    if not match:
+        return None
+    number = int(re.sub(r"\D", "", match.group()))
+    return number * 1000 if "هزار" in text else number
+
+
+def parse_year(text):
+    """'۱۳۹۸' -> 1398 ؛ 'قبل از ۱۳۶۶' -> 1366 ؛ '2019' -> 2019."""
+    match = re.search(r"\d{4}", str(text or "").translate(PERSIAN_DIGITS))
+    return int(match.group()) if match else None
+
+
 # ---------------------------------------------------------------- لیست آگهی‌ها
-def search_body(max_toman, pagination_data=None):
+def search_body(min_toman, max_toman, pagination_data=None):
     body = {
         "city_ids": [TEHRAN_CITY_ID],
         "source_view": "CATEGORY",
@@ -77,7 +109,7 @@ def search_body(max_toman, pagination_data=None):
             "form_data": {
                 "data": {
                     "category": {"str": {"value": CATEGORY}},
-                    "price": {"number_range": {"maximum": str(max_toman)}},
+                    "price": {"number_range": {"minimum": str(min_toman), "maximum": str(max_toman)}},
                 }
             }
         },
@@ -102,70 +134,68 @@ def parse_post_rows(data):
         bottom = w.get("bottom_description_text") or ""
         posts.append({
             "token": token,
-            "عنوان": w.get("title") or "",
-            "قیمت (تومان)": price_from_texts(middle, top, bottom),
-            "کارکرد (لیست)": top if "کیلومتر" in top else "",
-            "زمان و محله": bottom,
-            "لینک": POST_URL.format(token=token),
+            "title": w.get("title") or "",
+            "price": price_from_texts(middle, top, bottom),
+            "list_mileage": top if "کیلومتر" in top else "",
+            "place": bottom,
         })
     return posts
 
 
-def qualifying(posts, max_toman):
-    """فقط قیمت‌دار و زیر سقف (حتی اگر فیلتر سایت اعمال نشده باشد)؛ بدون آگهی تکراری."""
-    unique = {}
-    for post in posts:
-        price = post["قیمت (تومان)"]
-        if price and price <= max_toman and post["token"] not in unique:
-            post["قیمت (ریال)"] = price * 10
-            unique[post["token"]] = post
-    return list(unique.values())
-
-
-def fetch_list_api(max_toman, max_pages, limit):
-    posts, pagination = [], None
+def iter_list_api(min_toman, max_toman, max_pages):
+    """صفحه به صفحه آگهی‌ها را برمی‌گرداند (generator)، تا هر آگهی فوراً پردازش شود."""
+    pagination = None
     for page in range(1, max_pages + 1):
-        resp = session.post(SEARCH_API, json=search_body(max_toman, pagination), timeout=TIMEOUT)
+        resp = session.post(SEARCH_API, json=search_body(min_toman, max_toman, pagination), timeout=TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
         rows = parse_post_rows(data)
-        print(f"صفحه {page}: {len(rows)} آگهی")
+        print(f"\n--- صفحه {page}: {len(rows)} آگهی ---")
         if not rows:
-            break
-        posts += rows
-        if limit and len(qualifying(posts, max_toman)) >= limit:
-            break  # به تعداد خواسته‌شده رسیدیم؛ صفحه بعد لازم نیست
+            return
+        yield from rows
         pagination = data.get("pagination", {}).get("data")
         if not pagination or data.get("pagination", {}).get("has_next_page") is False:
-            break
+            return
         time.sleep(DELAY)
-    return posts
 
 
-def fetch_list_html(max_toman):
+def iter_posts(min_toman, max_toman, max_pages):
     """
-    اگر API جواب نداد: صفحه HTML دیوار (فقط صفحه اول، چون بقیه با جاوااسکریپت می‌آید).
+    اول API (همه صفحات)؛ اگر همان درخواست اول رد شد، صفحه HTML.
+    اگر وسط کار خطا داد، خطا به بالا می‌رود تا آگهی‌های ذخیره‌شده حفظ شوند.
     """
-    resp = session.get(LIST_PAGE, params={"price": f"-{max_toman}"}, timeout=TIMEOUT)
+    got_any = False
+    try:
+        for post in iter_list_api(min_toman, max_toman, max_pages):
+            got_any = True
+            yield post
+    except (requests.RequestException, ValueError) as exc:
+        if got_any:
+            raise
+        print(f"[API دیوار جواب نداد: {exc}] — خواندن صفحه HTML (فقط صفحه اول)...")
+        yield from fetch_list_html(min_toman, max_toman)
+
+
+def fetch_list_html(min_toman, max_toman):
+    """اگر API جواب نداد: صفحه HTML دیوار (فقط صفحه اول، چون بقیه با جاوااسکریپت می‌آید)."""
+    resp = session.get(LIST_PAGE, params={"price": f"{min_toman}-{max_toman}"}, timeout=TIMEOUT)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
     posts = []
     for card in soup.select("article.kt-post-card, div.kt-post-card"):
-        link = card.find("a", href=re.compile(r"/v/"))
-        if link is None:
-            link = card.find_parent("a", href=re.compile(r"/v/"))
+        link = card.find("a", href=re.compile(r"/v/")) or card.find_parent("a", href=re.compile(r"/v/"))
         if link is None:
             continue
-        token = link["href"].rstrip("/").split("/")[-1]
         title_el = card.select_one(".kt-post-card__title, h2")
-        texts = [d.get_text(" ", strip=True) for d in card.select(".kt-post-card__description, .kt-post-card__bottom-description")]
+        texts = [d.get_text(" ", strip=True) for d in
+                 card.select(".kt-post-card__description, .kt-post-card__bottom-description")]
         posts.append({
-            "token": token,
-            "عنوان": title_el.get_text(strip=True) if title_el else "",
-            "قیمت (تومان)": price_from_texts(*texts),
-            "کارکرد (لیست)": next((t for t in texts if "کیلومتر" in t), ""),
-            "زمان و محله": texts[-1] if texts else "",
-            "لینک": POST_URL.format(token=token),
+            "token": link["href"].rstrip("/").split("/")[-1],
+            "title": title_el.get_text(strip=True) if title_el else "",
+            "price": price_from_texts(*texts),
+            "list_mileage": next((t for t in texts if "کیلومتر" in t), ""),
+            "place": texts[-1] if texts else "",
         })
     return posts
 
@@ -207,6 +237,7 @@ def description_from_html(token):
 
 
 def fetch_details(token):
+    """-> (فیلدهای title/value، متن توضیحات)"""
     fields, description = {}, []
     try:
         resp = session.get(POST_API.format(token=token), timeout=TIMEOUT)
@@ -218,103 +249,207 @@ def fetch_details(token):
             if seo_desc:
                 description.append(seo_desc)
     except (requests.RequestException, ValueError) as exc:
-        print(f"[API جزئیات {token} جواب نداد: {exc}] — خواندن توضیحات از صفحه آگهی")
+        print(f"  [API جزئیات جواب نداد: {exc}] — خواندن توضیحات از صفحه آگهی")
     if not description:
         try:
             html_desc = description_from_html(token)
             if html_desc:
                 description.append(html_desc)
         except requests.RequestException as exc:
-            print(f"[صفحه آگهی {token} باز نشد: {exc}]")
-    fields["توضیحات"] = "\n".join(dict.fromkeys(description))  # بدون متن تکراری
-    return fields
+            print(f"  [صفحه آگهی باز نشد: {exc}]")
+    return fields, "\n".join(dict.fromkeys(description))  # بدون متن تکراری
 
 
-# ---------------------------------------------------------------- اکسل
-BASE_COLUMNS = ["عنوان", "قیمت (تومان)", "قیمت (ریال)", "توضیحات", "زمان و محله"]
-PREFERRED = ["برند و تیپ", "مدل (سال تولید)", "کارکرد", "رنگ", "نوع سوخت", "گیربکس",
-             "وضعیت موتور", "وضعیت شاسی‌ها", "وضعیت بدنه", "مهلت بیمهٔ شخص ثالث",
-             "قیمت پایه", "معاوضه"]
+# ---------------------------------------------------------------- ردیف CSV
+COLUMNS = [
+    "token", "عنوان", "لینک", "قیمت (تومان)", "قیمت (ریال)",
+    "برند و تیپ", "سال تولید", "سال (عدد)", "کارکرد", "کارکرد (کیلومتر)",
+    "رنگ", "نوع سوخت", "گیربکس", "وضعیت موتور", "وضعیت شاسی", "وضعیت بدنه",
+    "بیمه شخص ثالث", "معاوضه", "زمان و محله", "توضیحات", "سایر مشخصات", "زمان ثبت",
+]
+# فیلد دیوار -> ستون CSV (با کلمه کلیدی، چون عنوان‌ها کمی فرق می‌کنند: «شاسی جلو»، «مهلت بیمهٔ ...»)
+FIELD_KEYWORDS = [
+    ("برند", "برند و تیپ"), ("سال", "سال تولید"), ("کارکرد", "کارکرد"), ("رنگ", "رنگ"),
+    ("سوخت", "نوع سوخت"), ("گیربکس", "گیربکس"), ("موتور", "وضعیت موتور"),
+    ("شاسی", "وضعیت شاسی"), ("بدنه", "وضعیت بدنه"), ("بیمه", "بیمه شخص ثالث"),
+    ("معاوضه", "معاوضه"),
+]
 
 
-def save_excel(posts, path):
-    extra = []
-    for post in posts:
-        for key in post:
-            if key not in BASE_COLUMNS + ["token", "لینک", "کارکرد (لیست)"] and key not in extra:
-                extra.append(key)
-    extra.sort(key=lambda k: PREFERRED.index(k) if k in PREFERRED else len(PREFERRED))
-    if not any(p.get("کارکرد") for p in posts):
-        extra.insert(0, "کارکرد (لیست)")
-    # لینک درست کنار عنوان، تا بدون اسکرول بشود هر ردیف را در سایت چک کرد
-    columns = BASE_COLUMNS[:1] + ["لینک"] + BASE_COLUMNS[1:] + extra
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "خودرو تهران"
-    ws.sheet_view.rightToLeft = True
-    ws.append(columns)
-    for cell in ws[1]:
-        cell.font = Font(bold=True, color="FFFFFF")
-        cell.fill = PatternFill("solid", fgColor="4472C4")
-        cell.alignment = Alignment(horizontal="center", wrap_text=True)
-    ws.freeze_panes = "C2"  # عنوان و لینک موقع اسکرول افقی ثابت می‌مانند
-
-    for post in posts:
-        ws.append([post.get(col, "") for col in columns])
-        r = ws.max_row
-        for col in ("قیمت (تومان)", "قیمت (ریال)"):
-            ws.cell(row=r, column=columns.index(col) + 1).number_format = "#,##0"
-        ws.cell(row=r, column=columns.index("توضیحات") + 1).alignment = Alignment(
-            wrap_text=True, vertical="top"
-        )
-        for col in ("عنوان", "لینک"):  # خود عنوان هم قابل کلیک است
-            cell = ws.cell(row=r, column=columns.index(col) + 1)
-            cell.hyperlink = post["لینک"]
-            cell.style = "Hyperlink"
-
-    widths = {"عنوان": 35, "توضیحات": 60, "لینک": 30, "زمان و محله": 25}
-    for idx, col in enumerate(columns, start=1):
-        ws.column_dimensions[ws.cell(row=1, column=idx).column_letter].width = widths.get(col, 16)
-    ws.auto_filter.ref = ws.dimensions
-    wb.save(path)
+def build_row(post, fields, description):
+    row = dict.fromkeys(COLUMNS, "")
+    row.update({
+        "token": post["token"],
+        "عنوان": post["title"],
+        "لینک": POST_URL.format(token=post["token"]),
+        "قیمت (تومان)": post["price"],
+        "قیمت (ریال)": post["price"] * 10,
+        "زمان و محله": post["place"],
+        "توضیحات": description,
+        "زمان ثبت": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    })
+    other = {}
+    for name, value in fields.items():
+        column = next((col for key, col in FIELD_KEYWORDS if key in name), None)
+        if column is None:
+            other[name] = value
+        elif row[column]:
+            row[column] += f" | {name}: {value}"  # مثلاً شاسی جلو + شاسی عقب
+        else:
+            row[column] = value if column != "وضعیت شاسی" else f"{name}: {value}"
+    if not row["کارکرد"]:
+        row["کارکرد"] = post["list_mileage"]
+    row["کارکرد (کیلومتر)"] = parse_mileage(row["کارکرد"])
+    row["سال (عدد)"] = parse_year(row["سال تولید"])
+    row["سایر مشخصات"] = json.dumps(other, ensure_ascii=False) if other else ""
+    for key, value in row.items():  # برای CSV: None -> خالی
+        if value is None:
+            row[key] = ""
+    return row
 
 
-def main():
-    parser = argparse.ArgumentParser(description="خودروهای دیوار تهران زیر سقف قیمت -> اکسل")
-    parser.add_argument("--max-rial", type=int, default=20_000_000_000, help="سقف قیمت به ریال")
-    parser.add_argument("--limit", type=int, default=10, help="تعداد آگهی (پیش‌فرض ۱۰؛ ۰ یعنی همه)")
-    parser.add_argument("--max-pages", type=int, default=50, help="حداکثر صفحات لیست (هر صفحه حدود ۲۰ آگهی)")
-    parser.add_argument("--no-details", action="store_true", help="جزئیات آگهی‌ها خوانده نشود (سریع‌تر)")
-    parser.add_argument("-o", "--output", default="divar_cars.xlsx", help="فایل اکسل خروجی")
-    args = parser.parse_args()
-    max_toman = args.max_rial // 10
+# ---------------------------------------------------------------- CSV
+class CsvStore:
+    """
+    هر ردیف به محض آماده شدن با یک write به انتهای فایل اضافه و flush می‌شود.
+    اگر فایل در اکسل باز و قفل باشد، ردیف‌ها در حافظه می‌مانند و دفعه بعد نوشته می‌شوند.
+    """
 
+    def __init__(self, path):
+        self.path = path
+        self.pending = []
+        self.tokens = set()
+        if os.path.exists(path):
+            with open(path, encoding="utf-8-sig", newline="") as fh:
+                reader = csv.DictReader(fh)
+                if reader.fieldnames != COLUMNS:
+                    fh.close()
+                    backup = path.replace(".csv", f".old-{datetime.now():%Y%m%d-%H%M%S}.csv")
+                    os.replace(path, backup)
+                    print(f"ستون‌های CSV قبلی فرق داشت؛ فایل قبلی به {os.path.basename(backup)} منتقل شد.")
+                else:
+                    self.tokens = {r["token"] for r in reader if r.get("token")}
+        if not os.path.exists(path):
+            with open(path, "w", encoding="utf-8-sig", newline="") as fh:  # BOM تا اکسل فارسی را درست نشان دهد
+                csv.writer(fh).writerow(COLUMNS)
+
+    def add(self, row):
+        self.tokens.add(row["token"])
+        self.pending.append(row)
+        self.flush()
+
+    def flush(self):
+        if not self.pending:
+            return True
+        buf = io.StringIO()
+        writer = csv.DictWriter(buf, fieldnames=COLUMNS)
+        writer.writerows(self.pending)
+        try:
+            with open(self.path, "a", encoding="utf-8", newline="") as fh:
+                fh.write(buf.getvalue())
+                fh.flush()
+        except PermissionError:
+            print(f"  [فایل {os.path.basename(self.path)} قفل است (احتمالاً در اکسل باز است)؛ "
+                  f"{len(self.pending)} ردیف بعداً نوشته می‌شود. برای دیدن زنده از نمایشگر استفاده کنید.]")
+            return False
+        self.pending.clear()
+        return True
+
+
+# ---------------------------------------------------------------- نمایشگر
+class QuietHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store")  # همیشه آخرین نسخه CSV
+        super().end_headers()
+
+    def log_message(self, *args):
+        pass
+
+
+def start_viewer():
+    handler = functools.partial(QuietHandler, directory=HERE)
+    for port in range(PORT, PORT + 20):
+        try:
+            server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+            break
+        except OSError:
+            continue
+    else:
+        print("[پورت آزاد برای نمایشگر پیدا نشد]")
+        return None
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    url = f"http://127.0.0.1:{port}/{VIEWER_NAME}"
+    print(f"نمایشگر: {url}")
+    webbrowser.open(url)
+    return server
+
+
+def wait_for_exit():
     try:
-        posts = fetch_list_api(max_toman, args.max_pages, args.limit)
+        input("\nنمایشگر هنوز باز است. برای بستن Enter بزنید...")
+    except (EOFError, KeyboardInterrupt):
+        pass
+
+
+# ---------------------------------------------------------------- اجرا
+def main():
+    parser = argparse.ArgumentParser(description="خودروهای دیوار تهران در بازه قیمت -> CSV")
+    parser.add_argument("--min-rial", type=int, default=5_000_000_000, help="کف قیمت به ریال")
+    parser.add_argument("--max-rial", type=int, default=20_000_000_000, help="سقف قیمت به ریال")
+    parser.add_argument("--limit", type=int, default=0, help="توقف بعد از این تعداد آگهی جدید (۰ یعنی بدون محدودیت)")
+    parser.add_argument("--max-pages", type=int, default=200, help="حداکثر صفحات لیست (هر صفحه حدود ۲۰ آگهی)")
+    parser.add_argument("--no-details", action="store_true", help="جزئیات و توضیحات خوانده نشود (سریع‌تر)")
+    parser.add_argument("--serve", action="store_true", help="نمایشگر HTML را هم باز کن")
+    parser.add_argument("--view-only", action="store_true", help="فقط نمایشگر؛ بدون جمع‌آوری")
+    parser.add_argument("-o", "--output", default=os.path.join(HERE, CSV_NAME), help="فایل CSV")
+    args = parser.parse_args()
+
+    if args.view_only:
+        if start_viewer():
+            wait_for_exit()
+        return
+
+    min_toman, max_toman = args.min_rial // 10, args.max_rial // 10
+    store = CsvStore(args.output)
+    print(f"بازه قیمت: {args.min_rial:,} تا {args.max_rial:,} ریال | "
+          f"{len(store.tokens)} آگهی از قبل در CSV هست")
+    server = start_viewer() if args.serve else None
+
+    added = skipped = 0
+    try:
+        for post in iter_posts(min_toman, max_toman, args.max_pages):
+            price = post["price"]
+            if not price or not (min_toman <= price <= max_toman):
+                continue  # توافقی یا خارج از بازه (حتی اگر فیلتر سایت اعمال نشده باشد)
+            if post["token"] in store.tokens:
+                skipped += 1
+                continue
+            fields, description = ({}, "") if args.no_details else fetch_details(post["token"])
+            row = build_row(post, fields, description)
+            store.add(row)
+            added += 1
+            print(f"{added}. {row['عنوان']}  |  {price:,} تومان  |  "
+                  f"{row['سال تولید'] or '-'}  |  {row['کارکرد'] or '-'}  |  {row['لینک']}")
+            if args.limit and added >= args.limit:
+                break
+            if not args.no_details:
+                time.sleep(DELAY)
+    except KeyboardInterrupt:
+        print("\nمتوقف شد (Ctrl+C). آگهی‌های تا اینجا ذخیره شده‌اند.")
     except (requests.RequestException, ValueError) as exc:
-        print(f"[API دیوار جواب نداد: {exc}] — خواندن صفحه HTML (فقط صفحه اول)...")
-        posts = fetch_list_html(max_toman)
+        print(f"\n[خطا هنگام خواندن صفحه بعدی: {exc}] — آگهی‌های تا اینجا ذخیره شده‌اند.")
 
-    posts = qualifying(posts, max_toman)
-    if args.limit:
-        posts = posts[:args.limit]
-    print(f"\n{len(posts)} آگهی قیمت‌دار زیر {args.max_rial:,} ریال")
-    if args.no_details:
-        for i, post in enumerate(posts, start=1):
-            print(f"{i}/{len(posts)}  {post['عنوان']}  |  {post['قیمت (تومان)']:,} تومان  |  {post['لینک']}")
+    if not store.flush():
+        fallback = args.output.replace(".csv", "-pending.csv")
+        with open(fallback, "w", encoding="utf-8-sig", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=COLUMNS)
+            writer.writeheader()
+            writer.writerows(store.pending)
+        print(f"فایل اصلی قفل بود؛ ردیف‌های باقیمانده در {os.path.basename(fallback)} ذخیره شد.")
 
-    if not args.no_details:
-        for i, post in enumerate(posts, start=1):
-            try:
-                post.update({k: v for k, v in fetch_details(post["token"]).items() if k not in post})
-            except (requests.RequestException, ValueError) as exc:
-                print(f"[خطا در جزئیات {post['token']}: {exc}]")
-            print(f"{i}/{len(posts)}  {post['عنوان']}  |  {post['قیمت (تومان)']:,} تومان  |  {post['لینک']}")
-            time.sleep(DELAY)
-
-    save_excel(posts, args.output)
-    print(f"\nذخیره شد: {args.output}")
+    print(f"\n{added} آگهی جدید اضافه شد، {skipped} آگهی تکراری رد شد. فایل: {args.output}")
+    if server:
+        wait_for_exit()
 
 
 if __name__ == "__main__":
