@@ -215,7 +215,8 @@ def save_excel(posts, path):
     extra.sort(key=lambda k: (PREFERRED.index(k) if k in PREFERRED else len(PREFERRED), k == "توضیحات"))
     if not any(p.get("کارکرد") for p in posts):
         extra.insert(0, "کارکرد (لیست)")
-    columns = BASE_COLUMNS + extra + ["لینک"]
+    # لینک درست کنار عنوان، تا بدون اسکرول بشود هر ردیف را در سایت چک کرد
+    columns = BASE_COLUMNS[:1] + ["لینک"] + BASE_COLUMNS[1:] + extra
 
     wb = Workbook()
     ws = wb.active
@@ -226,16 +227,17 @@ def save_excel(posts, path):
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="4472C4")
         cell.alignment = Alignment(horizontal="center", wrap_text=True)
-    ws.freeze_panes = "B2"
+    ws.freeze_panes = "C2"  # عنوان و لینک موقع اسکرول افقی ثابت می‌مانند
 
     for post in posts:
         ws.append([post.get(col, "") for col in columns])
         r = ws.max_row
         for col in ("قیمت (تومان)", "قیمت (ریال)"):
             ws.cell(row=r, column=columns.index(col) + 1).number_format = "#,##0"
-        link = ws.cell(row=r, column=len(columns))
-        link.hyperlink = post["لینک"]
-        link.style = "Hyperlink"
+        for col in ("عنوان", "لینک"):  # خود عنوان هم قابل کلیک است
+            cell = ws.cell(row=r, column=columns.index(col) + 1)
+            cell.hyperlink = post["لینک"]
+            cell.style = "Hyperlink"
 
     widths = {"عنوان": 35, "توضیحات": 60, "لینک": 30, "زمان و محله": 25}
     for idx, col in enumerate(columns, start=1):
@@ -264,6 +266,9 @@ def main():
     if args.limit:
         posts = posts[:args.limit]
     print(f"\n{len(posts)} آگهی قیمت‌دار زیر {args.max_rial:,} ریال")
+    if args.no_details:
+        for i, post in enumerate(posts, start=1):
+            print(f"{i}/{len(posts)}  {post['عنوان']}  |  {post['قیمت (تومان)']:,} تومان  |  {post['لینک']}")
 
     if not args.no_details:
         for i, post in enumerate(posts, start=1):
@@ -271,7 +276,7 @@ def main():
                 post.update({k: v for k, v in fetch_details(post["token"]).items() if k not in post})
             except (requests.RequestException, ValueError) as exc:
                 print(f"[خطا در جزئیات {post['token']}: {exc}]")
-            print(f"جزئیات {i}/{len(posts)}: {post['عنوان']}")
+            print(f"{i}/{len(posts)}  {post['عنوان']}  |  {post['قیمت (تومان)']:,} تومان  |  {post['لینک']}")
             time.sleep(DELAY)
 
     save_excel(posts, args.output)
