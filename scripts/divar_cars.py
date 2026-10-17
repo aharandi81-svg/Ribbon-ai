@@ -171,39 +171,70 @@ def fetch_list_html(max_toman):
 
 
 # ---------------------------------------------------------------- جزئیات آگهی
-def walk_fields(node, fields, description):
-    """هر جای JSON که جفت title/value بود یک فیلد است (کارکرد، مدل، رنگ، گیربکس، ...)."""
+def walk_fields(node, fields, description, in_description=False):
+    """
+    هر جای JSON که جفت title/value بود یک فیلد است (کارکرد، مدل، رنگ، گیربکس، ...).
+    متن توضیحات از ویجت DESCRIPTION_ROW یا هر متنی داخل بخش DESCRIPTION جمع می‌شود.
+    """
     if isinstance(node, dict):
+        in_description = in_description or node.get("section_name") == "DESCRIPTION"
         title, value = node.get("title"), node.get("value")
         if isinstance(title, str) and isinstance(value, str) and title.strip() and value.strip():
             fields.setdefault(title.strip(), value.strip())
-        if node.get("widget_type") == "DESCRIPTION_ROW":
-            text = (node.get("data") or {}).get("text")
-            if text:
-                description.append(text)
+        data = node.get("data") if isinstance(node.get("data"), dict) else {}
+        text = data.get("text") or (node.get("text") if in_description else None)
+        if isinstance(text, str) and text.strip() and (
+            node.get("widget_type") == "DESCRIPTION_ROW" or in_description
+        ):
+            description.append(text.strip())
         for child in node.values():
-            walk_fields(child, fields, description)
+            walk_fields(child, fields, description, in_description)
     elif isinstance(node, list):
         for child in node:
-            walk_fields(child, fields, description)
+            walk_fields(child, fields, description, in_description)
+
+
+def description_from_html(token):
+    """اگر API توضیحات نداد: خود صفحه آگهی در divar.ir/v/... (متن توضیحات یا meta description)."""
+    resp = session.get(POST_URL.format(token=token), timeout=TIMEOUT)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    el = soup.select_one(".kt-description-row__text, [class*=description-row__text]")
+    if el and el.get_text(strip=True):
+        return el.get_text("\n", strip=True)
+    meta = soup.select_one('meta[name="description"], meta[property="og:description"]')
+    return (meta.get("content") or "").strip() if meta else ""
 
 
 def fetch_details(token):
-    resp = session.get(POST_API.format(token=token), timeout=TIMEOUT)
-    resp.raise_for_status()
-    data = resp.json()
     fields, description = {}, []
-    walk_fields(data.get("sections") or data, fields, description)
-    if description:
-        fields["توضیحات"] = description[0]
+    try:
+        resp = session.get(POST_API.format(token=token), timeout=TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        walk_fields(data.get("sections") or data, fields, description)
+        if not description:
+            seo_desc = (data.get("seo") or {}).get("description")
+            if seo_desc:
+                description.append(seo_desc)
+    except (requests.RequestException, ValueError) as exc:
+        print(f"[API جزئیات {token} جواب نداد: {exc}] — خواندن توضیحات از صفحه آگهی")
+    if not description:
+        try:
+            html_desc = description_from_html(token)
+            if html_desc:
+                description.append(html_desc)
+        except requests.RequestException as exc:
+            print(f"[صفحه آگهی {token} باز نشد: {exc}]")
+    fields["توضیحات"] = "\n".join(dict.fromkeys(description))  # بدون متن تکراری
     return fields
 
 
 # ---------------------------------------------------------------- اکسل
-BASE_COLUMNS = ["عنوان", "قیمت (تومان)", "قیمت (ریال)", "زمان و محله"]
+BASE_COLUMNS = ["عنوان", "قیمت (تومان)", "قیمت (ریال)", "توضیحات", "زمان و محله"]
 PREFERRED = ["برند و تیپ", "مدل (سال تولید)", "کارکرد", "رنگ", "نوع سوخت", "گیربکس",
              "وضعیت موتور", "وضعیت شاسی‌ها", "وضعیت بدنه", "مهلت بیمهٔ شخص ثالث",
-             "قیمت پایه", "معاوضه", "توضیحات"]
+             "قیمت پایه", "معاوضه"]
 
 
 def save_excel(posts, path):
@@ -212,7 +243,7 @@ def save_excel(posts, path):
         for key in post:
             if key not in BASE_COLUMNS + ["token", "لینک", "کارکرد (لیست)"] and key not in extra:
                 extra.append(key)
-    extra.sort(key=lambda k: (PREFERRED.index(k) if k in PREFERRED else len(PREFERRED), k == "توضیحات"))
+    extra.sort(key=lambda k: PREFERRED.index(k) if k in PREFERRED else len(PREFERRED))
     if not any(p.get("کارکرد") for p in posts):
         extra.insert(0, "کارکرد (لیست)")
     # لینک درست کنار عنوان، تا بدون اسکرول بشود هر ردیف را در سایت چک کرد
@@ -234,6 +265,9 @@ def save_excel(posts, path):
         r = ws.max_row
         for col in ("قیمت (تومان)", "قیمت (ریال)"):
             ws.cell(row=r, column=columns.index(col) + 1).number_format = "#,##0"
+        ws.cell(row=r, column=columns.index("توضیحات") + 1).alignment = Alignment(
+            wrap_text=True, vertical="top"
+        )
         for col in ("عنوان", "لینک"):  # خود عنوان هم قابل کلیک است
             cell = ws.cell(row=r, column=columns.index(col) + 1)
             cell.hyperlink = post["لینک"]
