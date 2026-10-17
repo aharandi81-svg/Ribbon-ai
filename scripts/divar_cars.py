@@ -4,6 +4,8 @@
 استفاده:
     python divar_cars.py                              # سقف پیش‌فرض: ۲۰٬۰۰۰٬۰۰۰٬۰۰۰ ریال
     python divar_cars.py --max-rial 15000000000 -o cars.xlsx
+    python divar_cars.py --limit 50                   # ۵۰ آگهی به‌جای ۱۰ تای پیش‌فرض
+    python divar_cars.py --limit 0                    # همه آگهی‌ها (تا --max-pages)
     python divar_cars.py --max-pages 5 --no-details   # سریع: فقط اطلاعات لیست
 
 بدون مرورگر؛ فقط requests + BeautifulSoup + openpyxl.
@@ -109,7 +111,18 @@ def parse_post_rows(data):
     return posts
 
 
-def fetch_list_api(max_toman, max_pages):
+def qualifying(posts, max_toman):
+    """فقط قیمت‌دار و زیر سقف (حتی اگر فیلتر سایت اعمال نشده باشد)؛ بدون آگهی تکراری."""
+    unique = {}
+    for post in posts:
+        price = post["قیمت (تومان)"]
+        if price and price <= max_toman and post["token"] not in unique:
+            post["قیمت (ریال)"] = price * 10
+            unique[post["token"]] = post
+    return list(unique.values())
+
+
+def fetch_list_api(max_toman, max_pages, limit):
     posts, pagination = [], None
     for page in range(1, max_pages + 1):
         resp = session.post(SEARCH_API, json=search_body(max_toman, pagination), timeout=TIMEOUT)
@@ -120,6 +133,8 @@ def fetch_list_api(max_toman, max_pages):
         if not rows:
             break
         posts += rows
+        if limit and len(qualifying(posts, max_toman)) >= limit:
+            break  # به تعداد خواسته‌شده رسیدیم؛ صفحه بعد لازم نیست
         pagination = data.get("pagination", {}).get("data")
         if not pagination or data.get("pagination", {}).get("has_next_page") is False:
             break
@@ -232,6 +247,7 @@ def save_excel(posts, path):
 def main():
     parser = argparse.ArgumentParser(description="خودروهای دیوار تهران زیر سقف قیمت -> اکسل")
     parser.add_argument("--max-rial", type=int, default=20_000_000_000, help="سقف قیمت به ریال")
+    parser.add_argument("--limit", type=int, default=10, help="تعداد آگهی (پیش‌فرض ۱۰؛ ۰ یعنی همه)")
     parser.add_argument("--max-pages", type=int, default=50, help="حداکثر صفحات لیست (هر صفحه حدود ۲۰ آگهی)")
     parser.add_argument("--no-details", action="store_true", help="جزئیات آگهی‌ها خوانده نشود (سریع‌تر)")
     parser.add_argument("-o", "--output", default="divar_cars.xlsx", help="فایل اکسل خروجی")
@@ -239,19 +255,14 @@ def main():
     max_toman = args.max_rial // 10
 
     try:
-        posts = fetch_list_api(max_toman, args.max_pages)
+        posts = fetch_list_api(max_toman, args.max_pages, args.limit)
     except (requests.RequestException, ValueError) as exc:
         print(f"[API دیوار جواب نداد: {exc}] — خواندن صفحه HTML (فقط صفحه اول)...")
         posts = fetch_list_html(max_toman)
 
-    # فقط قیمت‌دار و زیر سقف (دوباره چک می‌شود، حتی اگر فیلتر سایت اعمال نشده باشد)؛ بدون تکرار
-    unique = {}
-    for post in posts:
-        price = post["قیمت (تومان)"]
-        if price and price <= max_toman and post["token"] not in unique:
-            post["قیمت (ریال)"] = price * 10
-            unique[post["token"]] = post
-    posts = list(unique.values())
+    posts = qualifying(posts, max_toman)
+    if args.limit:
+        posts = posts[:args.limit]
     print(f"\n{len(posts)} آگهی قیمت‌دار زیر {args.max_rial:,} ریال")
 
     if not args.no_details:
