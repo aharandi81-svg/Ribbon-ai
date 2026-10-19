@@ -266,3 +266,89 @@ def test_debug_off_saves_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(ps, "DEBUG_DIR", None)
     ps.debug_save("x.json", "{}")
     assert os.listdir(tmp_path) == []
+
+
+# ---------------------------------------------------------------- bonakbazar / dastavval (عمومی)
+def test_generic_json_rial_and_unit_per_kg():
+    # شبیه بنک‌بازار: قیمت واحد ریالی به ازای هر کیلوگرم، وزن در فیلد unit
+    data = {"data": {"items": [
+        {"id": 408, "title": "برنج سوپر باسماتی هایلی", "unit_price": 550000, "unit": "کیلوگرم"},
+        {"id": 9, "title": "روغن سرخ‌کردنی", "price": "7,150,000 ریال", "unit": {"title": "کارتن ۱۶ کیلویی"}},
+        {"id": 3, "title": "بدون قیمت", "price": 0},
+    ]}}
+    found = ps.candidates_from_json(data, "rial", "https://bonakbazar.com/products/{id}")
+    assert found[0] == {"title": "برنج سوپر باسماتی هایلی", "price": 55000,
+                        "url": "https://bonakbazar.com/products/408", "weight_text": "1 کیلوگرم"}
+    assert found[1]["price"] == 715000 and ps.parse_weight(found[1]["weight_text"]) == (16000, "گرم")
+    assert len(found) == 2
+
+
+def test_generic_json_toman_text_overrides_site_default():
+    found = ps.candidates_from_json([{"name": "شکر ۹۰۰ گرمی", "price": "۹۰,۰۰۰ تومان", "url": "/p/1"}],
+                                    "rial", None, "https://x.ir/search")
+    assert found[0]["price"] == 90000 and found[0]["url"] == "https://x.ir/p/1"
+
+
+def test_generic_html_json_ld_and_next_data():
+    ld = ('<script type="application/ld+json">{"@type": "Product", "name": "زعفران ۴ گرمی", '
+          '"url": "/p/2", "offers": {"price": "1200000", "priceCurrency": "IRR"}}</script>')
+    found = ps.candidates_from_html(ld, "https://x.ir/")
+    assert found == [{"title": "زعفران ۴ گرمی", "price": 120000, "url": "https://x.ir/p/2", "weight_text": ""}]
+    nd = ('<script id="__NEXT_DATA__" type="application/json">'
+          '{"props": {"products": [{"title": "عدس ۱ کیلویی", "price": 85000, "slug": "/product/ads"}]}}</script>')
+    assert ps.candidates_from_html(nd, "https://x.ir/")[0]["price"] == 85000
+
+
+def test_generic_html_cards_ignore_weight_and_old_price():
+    html = '''<div class="card"><a href="/product/12"><h3>پیاز زرد ۱ کیلو</h3></a>
+      <del>۱۵۰,۰۰۰ تومان</del><span>۱۲۰,۰۰۰</span> <span>تومان</span></div>
+      <div class="card"><a href="/about">درباره ما</a><span>۵۰,۰۰۰ تومان</span></div>'''
+    found = ps.candidates_from_html(html, "https://www.dastavval.com/search?q=x")
+    assert found == [{"title": "پیاز زرد ۱ کیلو", "price": 120000,
+                      "url": "https://www.dastavval.com/product/12", "weight_text": ""}]
+
+
+def test_search_generic_tries_urls_and_remembers(monkeypatch):
+    calls = []
+
+    def fake_get(url, params=None, **kwargs):
+        calls.append(url)
+        if url == "https://mobile.bonakbazar.com/search":
+            raise ps.requests.HTTPError("404")
+        return FakeResp('[{"title": "عدس", "unit_price": 900000, "unit": "کیلوگرم"}]', url)
+
+    monkeypatch.setattr(ps.session, "get", fake_get)
+    monkeypatch.setattr(ps, "WORKING_SEARCH", {})
+    assert ps.search_bonakbazar("عدس")[0]["price"] == 90000
+    assert calls == ["https://mobile.bonakbazar.com/search", "https://bonakbazar.com/search"]
+    calls.clear()
+    ps.search_bonakbazar("عدس")
+    assert calls == ["https://bonakbazar.com/search"]      # آدرس جواب‌داده به خاطر سپرده شد
+
+
+def test_search_generic_all_fail_raises(monkeypatch):
+    def fake_get(url, params=None, **kwargs):
+        raise ps.requests.ConnectionError("no route")
+
+    monkeypatch.setattr(ps.session, "get", fake_get)
+    monkeypatch.setattr(ps, "WORKING_SEARCH", {})
+    with pytest.raises(ps.requests.ConnectionError):
+        ps.search_dastavval("شکر")
+
+
+def test_comparison_sheet_rial_per_gram(monkeypatch, tmp_path):
+    from openpyxl import load_workbook
+    monkeypatch.setattr(ps, "DELAY", 0)
+    monkeypatch.setattr(ps, "SITES", {
+        "parsehshop.ir": lambda q: [{"title": "عدس ۱ کیلویی", "price": 90000, "url": "u1"}],
+        "bonakbazar.com": lambda q: [{"title": "عدس درشت", "price": 80000, "url": "u2", "weight_text": "1 کیلوگرم"}],
+        "dastavval.com": lambda q: [],
+    })
+    rows = ps.collect(["عدس"])
+    assert [r["rial_per_gram"] for r in rows] == [900.0, 800.0, None]   # ۹۰٬۰۰۰ تومان/کیلو = ۹۰۰ ریال/گرم
+    path = tmp_path / "out.xlsx"
+    ps.save_excel(rows, path)
+    ws = load_workbook(path)["مقایسه (ریال به ازای هر گرم)"]
+    assert [c.value for c in ws[1]] == ["نام ماده", "parsehshop.ir", "bonakbazar.com", "dastavval.com", "ارزان‌ترین سایت"]
+    assert [c.value for c in ws[2]] == ["عدس", 900, 800, "—", "bonakbazar.com"]
+    assert ws["C2"].fill.fgColor.rgb.endswith("C6EFCE") and ws["B2"].hyperlink.target == "u1"

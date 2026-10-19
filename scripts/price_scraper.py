@@ -1,5 +1,5 @@
 """
-جستجوی قیمت مواد اولیه در parsehshop.ir و digikala.com و ذخیره در اکسل.
+جستجوی قیمت مواد اولیه در parsehshop.ir، digikala.com، bonakbazar.com و dastavval.com و ذخیره در اکسل.
 
 استفاده:
     python price_scraper.py                       # لیست پیش‌فرض داخل اسکریپت
@@ -12,17 +12,20 @@
 ستون‌های اکسل: نام ماده، نام محصول، مقدار، واحد، قیمت (تومان)،
 قیمت هر کیلو/لیتر (تومان)، سایت، لینک محصول.
 وزن از عنوان محصول خوانده می‌شود (مثلاً «آرد ۱ کیلوگرمی» یا «روغن ۱/۵ لیتری»).
+برگه دوم «مقایسه»: هر ماده یک ردیف، هر سایت یک ستون، قیمت به ریال به ازای هر گرم.
 """
 
 import argparse
+import json
 import os
 import re
 import time
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 import requests
 from bs4 import BeautifulSoup
 from openpyxl import Workbook
+from openpyxl.comments import Comment
 from openpyxl.styles import Alignment, Font, PatternFill
 
 DEFAULT_ITEMS = ["آرد", "شکر", "روغن مایع", "بکینگ پودر", "وانیل"]
@@ -452,9 +455,251 @@ def parse_digikala_json(data):
     return candidates
 
 
+# ---------------------------------------------------------------- bonakbazar / dastavval
+# ساختار جستجوی این دو سایت از بیرون ایران قابل بررسی نبود؛ پس چند آدرس جستجوی رایج
+# امتحان می‌شود و پاسخ (JSON یا HTML) به چند روش عمومی خوانده می‌شود. اولین آدرسی که
+# محصول برگرداند برای بقیه مواد همان سایت به خاطر سپرده می‌شود.
+GENERIC_SITES = {
+    "bonakbazar.com": {
+        "key": "bonak",
+        "searches": [
+            ("https://mobile.bonakbazar.com/search", "q"),
+            ("https://bonakbazar.com/search", "q"),
+            ("https://bonakbazar.com/products", "search"),
+            ("https://mobile.bonakbazar.com/products", "search"),
+        ],
+        "currency": "rial",   # صفحه‌های بنک‌بازار «قیمت واحد: ۴۲۰٬۰۰۰ ریال» (هر کیلو) نشان می‌دهند
+        "product_url": "https://bonakbazar.com/products/{id}",
+    },
+    "dastavval.com": {
+        "key": "dastavval",
+        "searches": [
+            ("https://www.dastavval.com/search", "q"),
+            ("https://www.dastavval.com/", "s"),        # ووکامرس: ?s=...&post_type=product
+            ("https://www.dastavval.com/search", "query"),
+            ("https://www.dastavval.com/products", "search"),
+        ],
+        "currency": None,     # نامشخص؛ اگر واحد در متن نبود، مثل بقیه کد تومان فرض می‌شود
+        "product_url": None,
+    },
+}
+WORKING_SEARCH = {}  # سایت -> اندیس آدرس جستجویی که جواب داد
+
+NAME_KEYS = ("title_fa", "name_fa", "fa_name", "persian_name", "title", "name", "product_name", "productName")
+PRICE_KEYS = ("final_price", "selling_price", "sale_price", "special_price", "unit_price", "unitPrice",
+              "price_amount", "price", "min_price", "minPrice", "lowPrice", "amount")
+URL_KEYS = ("url", "link", "permalink", "href", "slug", "uri")
+UNIT_KEYS = ("unit", "unit_title", "unitTitle", "unit_name", "unitName", "sale_unit", "saleUnit",
+             "packaging", "package", "weight", "weight_title", "size")
+CURRENCY_KEYS = ("currency", "price_currency", "priceCurrency", "currency_code", "currency_iso_code")
+PRODUCT_LINK_RE = re.compile(r"/(?:products?|p|item|goods|kala)/", re.IGNORECASE)
+# «۱۲۰,۰۰۰ تومان» -> («120,000»، «تومان»)؛ متن قبلاً به ارقام انگلیسی تبدیل شده
+PRICE_AMOUNT_RE = re.compile(r"(\d{1,3}(?:[,٬،.]\d{3})+|\d{4,})\s*(ریال|تومان|﷼)")
+
+
+def _number(value):
+    """عدد قیمت از int/float/رشته/دیکشنری تودرتو ({"selling_price": ...} یا {"value": ...})."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return int(value) if value > 0 else None
+    if isinstance(value, str):
+        return to_int_price(value)
+    if isinstance(value, dict):
+        for key in PRICE_KEYS + ("value",):
+            if key in value:
+                found = _number(value[key])
+                if found:
+                    return found
+    return None
+
+
+def _unit_text(product):
+    """متن واحد فروش (مثلاً «کیلوگرم» یا «کارتن ۱۶ کیلویی») برای خواندن وزن به‌جای عنوان."""
+    parts = []
+    for key in UNIT_KEYS:
+        value = product.get(key)
+        if isinstance(value, dict):
+            value = next((value[k] for k in NAME_KEYS if isinstance(value.get(k), str)), None)
+        if isinstance(value, (str, int, float)) and not isinstance(value, bool) and str(value).strip():
+            parts.append(str(value).strip())
+    text = " ".join(parts)
+    if not text:
+        return ""
+    # «کیلوگرم» تنها یعنی «۱ کیلوگرم»
+    if not re.search(r"\d", text.translate(PERSIAN_DIGITS)) and parse_weight("1 " + text)[0]:
+        text = "1 " + text
+    return text if parse_weight(text)[0] else ""
+
+
+def candidates_from_json(data, site_currency=None, product_url=None, base_url=""):
+    """
+    هر دیکشنری JSON که نام + قیمت دارد یک محصول است (هر عمقی، هر ساختاری).
+    واحد پول از فیلد currency یا رشته قیمت؛ وگرنه پیش‌فرض سایت.
+    """
+    found, seen = [], set()
+
+    def walk(node):
+        if isinstance(node, list):
+            for child in node:
+                walk(child)
+            return
+        if not isinstance(node, dict):
+            return
+        name = next((node[k] for k in NAME_KEYS if isinstance(node.get(k), str) and node[k].strip()), None)
+        price_key = next((k for k in PRICE_KEYS if k in node and _number(node[k])), None)
+        if name and price_key:
+            raw = node[price_key]
+            currency = detect_currency(*(node.get(k) for k in CURRENCY_KEYS), raw if isinstance(raw, str) else "")
+            if currency is None and isinstance(node.get(price_key), dict):
+                currency = detect_currency(*(node[price_key].get(k) for k in CURRENCY_KEYS))
+            currency = currency or site_currency
+            price = _number(raw)
+            price = valid_price(price // 10 if currency == "rial" else price, name)
+            url = next((node[k] for k in URL_KEYS if isinstance(node.get(k), str) and node[k]), "")
+            if not url and product_url and node.get("id"):
+                url = product_url.format(id=node["id"])
+            title = " ".join(BeautifulSoup(name, "html.parser").get_text(" ").split())
+            if price and (title, price) not in seen:
+                seen.add((title, price))
+                found.append({
+                    "title": title,
+                    "price": price,
+                    "url": urljoin(base_url, url) if url else "",
+                    "weight_text": _unit_text(node),
+                })
+            return  # داخل یک محصول (تنوع‌ها، ...) دوباره محصول جدا نمی‌شود
+        for child in node.values():
+            walk(child)
+
+    walk(data)
+    return found
+
+
+def candidates_from_html(html, base_url, site_currency=None, product_url=None):
+    """
+    ۱) داده ساختاریافته JSON-LD (schema.org Product)
+    ۲) JSON داخل صفحه (__NEXT_DATA__ و script های application/json)
+    ۳) کارت‌ها: لینک محصول + نزدیک‌ترین متن قیمت‌دار (ریال/تومان)
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    found = []
+
+    for script in soup.select('script[type="application/ld+json"]'):
+        try:
+            data = json.loads(script.string or "")
+        except ValueError:
+            continue
+        for node in _iter_dicts(data):
+            if node.get("@type") not in ("Product", ["Product"]):
+                continue
+            offers = node.get("offers") or {}
+            offers = offers[0] if isinstance(offers, list) and offers else offers
+            if not isinstance(offers, dict):
+                continue
+            currency = detect_currency(offers.get("priceCurrency")) or site_currency
+            price = _number(offers.get("price") or offers.get("lowPrice"))
+            price = valid_price(price // 10 if price and currency == "rial" else price, node.get("name"))
+            if price and node.get("name"):
+                found.append({"title": node["name"], "price": price,
+                              "url": urljoin(base_url, node.get("url") or ""), "weight_text": ""})
+    if found:
+        return found
+
+    for script in soup.select('script#__NEXT_DATA__, script[type="application/json"]'):
+        try:
+            data = json.loads(script.string or "")
+        except ValueError:
+            continue
+        found += candidates_from_json(data, site_currency, product_url, base_url)
+    if found:
+        return found
+
+    for old in soup.select("del, s, .old-price, .regular-price, .discount, .discount-percent"):
+        old.decompose()
+    seen = set()
+    for link in soup.select("a[href]"):
+        url = urljoin(base_url, link["href"])
+        if url in seen or not PRODUCT_LINK_RE.search(urlsplit(url).path):
+            continue
+        container, price_match = link, None
+        for _ in range(5):  # تا ۵ سطح بالاتر دنبال کارتی بگرد که قیمت دارد
+            price_match = PRICE_AMOUNT_RE.search(container.get_text(" ", strip=True).translate(PERSIAN_DIGITS))
+            if price_match or container.parent is None:
+                break
+            container = container.parent
+        if not price_match:
+            continue
+        image = container.find("img", alt=True)
+        heading = container.find(["h1", "h2", "h3", "h4"])
+        title = (link.get("title") or link.get_text(" ", strip=True)
+                 or (heading.get_text(" ", strip=True) if heading else "") or (image["alt"] if image else ""))
+        # فقط عددی که درست کنار «ریال/تومان» آمده (نه وزن «۱ کیلو» در همان کارت)
+        price = valid_price(price_to_toman(price_match.group(1), detect_currency(price_match.group(2))), title)
+        if title and price:
+            seen.add(url)
+            found.append({"title": " ".join(title.split()), "price": price, "url": url, "weight_text": ""})
+    return found
+
+
+def _iter_dicts(node):
+    if isinstance(node, dict):
+        yield node
+        for child in node.values():
+            yield from _iter_dicts(child)
+    elif isinstance(node, list):
+        for child in node:
+            yield from _iter_dicts(child)
+
+
+def search_generic(site, query):
+    """آدرس‌های جستجوی سایت را به ترتیب امتحان کن؛ اولین آدرسی که محصول داد به خاطر سپرده می‌شود."""
+    conf = GENERIC_SITES[site]
+    order = list(range(len(conf["searches"])))
+    if site in WORKING_SEARCH:
+        order = [WORKING_SEARCH[site]]
+    last_error = None
+    for i in order:
+        url, param = conf["searches"][i]
+        params = {param: query}
+        if param == "s":
+            params["post_type"] = "product"
+        try:
+            resp = session.get(url, params=params, timeout=TIMEOUT)
+            resp.raise_for_status()
+        except requests.RequestException as exc:
+            last_error = exc
+            continue
+        debug_save(f"{conf['key']}_search_{i + 1}.txt", f"<!-- {resp.status_code} {resp.url} -->\n{resp.text}")
+        try:
+            candidates = candidates_from_json(resp.json(), conf["currency"], conf["product_url"], resp.url)
+        except ValueError:
+            candidates = candidates_from_html(resp.text, resp.url, conf["currency"], conf["product_url"])
+        if candidates:
+            if site not in WORKING_SEARCH:
+                print(f"[{site}] جستجو با {url}?{param}=... جواب داد.")
+            WORKING_SEARCH[site] = i
+            debug_fetch(f"{conf['key']}_product.html", candidates[0]["url"])
+            return candidates
+        last_error = None
+    if last_error and site not in WORKING_SEARCH:
+        raise last_error
+    return []
+
+
+def search_bonakbazar(query):
+    return search_generic("bonakbazar.com", query)
+
+
+def search_dastavval(query):
+    return search_generic("dastavval.com", query)
+
+
 SITES = {
     "parsehshop.ir": search_parsehshop,
     "digikala.com": search_digikala,
+    "bonakbazar.com": search_bonakbazar,
+    "dastavval.com": search_dastavval,
 }
 
 
@@ -469,7 +714,8 @@ def collect(items):
                 candidates = []
             result = pick_best(item, candidates) or {}
             price = result.get("price")
-            qty, unit = parse_weight(result.get("title"))
+            # اگر سایت واحد فروش جدا داده (مثلاً قیمت «هر کیلوگرم» در بنک‌بازار)، وزن از همان خوانده می‌شود
+            qty, unit = parse_weight(result.get("weight_text") or result.get("title"))
             # قیمت هر کیلو/لیتر به تومان (قیمت ÷ مقدار به گرم/میلی‌لیتر × ۱۰۰۰)؛
             # برای تطابق تقریبی خالی می‌ماند چون ممکن است محصول دیگری باشد
             per_unit = round(price * 1000 / qty) if price and qty and result.get("comparable") else None
@@ -481,6 +727,8 @@ def collect(items):
                 "unit": unit,
                 "price": price,
                 "per_unit": per_unit,
+                # ریال به ازای هر گرم (مایعات: هر میلی‌لیتر) برای برگه مقایسه
+                "rial_per_gram": round(price * 10 / qty, 2) if per_unit else None,
                 "site": site,
                 "url": result.get("url") or "",
             })
@@ -549,7 +797,59 @@ def save_excel(rows, path):
             link.hyperlink = row["url"]
             link.style = "Hyperlink"
 
+    add_comparison_sheet(wb, rows)
     wb.save(path)
+
+
+def add_comparison_sheet(wb, rows):
+    """
+    برگه «مقایسه»: هر ماده یک ردیف، هر سایت یک ستون، داخل خانه قیمت به ریال به ازای هر گرم
+    (برای مایعات هر میلی‌لیتر). خانه به محصول لینک دارد و نام محصول به‌صورت یادداشت روی آن است؛
+    ارزان‌ترین قیمت هر ردیف سبز می‌شود.
+    """
+    sites = list(dict.fromkeys(row["site"] for row in rows))
+    items = list(dict.fromkeys(row["item"] for row in rows))
+    by_key = {(row["item"], row["site"]): row for row in rows}
+
+    ws = wb.create_sheet("مقایسه (ریال به ازای هر گرم)")
+    ws.sheet_view.rightToLeft = True
+    ws.append(["نام ماده"] + sites + ["ارزان‌ترین سایت"])
+    for cell in ws[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor="4472C4")
+        cell.alignment = Alignment(horizontal="center")
+    ws.column_dimensions["A"].width = 24
+    for idx in range(2, len(sites) + 3):
+        ws.column_dimensions[ws.cell(row=1, column=idx).column_letter].width = 18
+    ws.freeze_panes = "B2"
+
+    for item in items:
+        values = []
+        for site in sites:
+            row = by_key.get((item, site)) or {}
+            values.append(row.get("rial_per_gram"))
+        priced = [(v, site) for v, site in zip(values, sites) if v]
+        cheapest = min(priced)[1] if priced else ""
+        ws.append([item] + [v if v else "—" for v in values] + [cheapest])
+        r = ws.max_row
+        for col, (site, value) in enumerate(zip(sites, values), start=2):
+            cell = ws.cell(row=r, column=col)
+            cell.alignment = Alignment(horizontal="center")
+            if not value:
+                continue
+            row = by_key[(item, site)]
+            cell.number_format = "#,##0.00"
+            cell.hyperlink = row["url"] or None
+            cell.font = Font(color="0563C1", underline="single")
+            unit = "میلی‌لیتر" if row["unit"] == "میلی‌لیتر" else "گرم"
+            cell.comment = Comment(f"{row['title']}\n{row['price']:,} تومان / {row['qty']:g} {row['unit']}\n"
+                                   f"ریال به ازای هر {unit}", "price_scraper")
+            if site == cheapest:
+                cell.fill = PatternFill("solid", fgColor="C6EFCE")
+
+    ws.append([])
+    ws.append(["قیمت‌ها به ریال به ازای هر گرم هستند (برای مایعات، هر میلی‌لیتر). «—» یعنی محصول مطابق "
+               "پیدا نشد یا وزنش در عنوان نبود. نام محصول با بردن موس روی هر قیمت دیده می‌شود."])
 
 
 def main():
