@@ -26,6 +26,5 @@ __pycache__/
 *.sw?
 
 # scraper outputs
-scripts/divar_cars*.csv
 scripts/*.xlsx
 scripts/parseh_debug.html
